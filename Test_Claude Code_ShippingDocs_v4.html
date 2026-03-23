@@ -117,7 +117,12 @@ textarea.fs.edited{border-color:#c86000!important;}
   #pl-qtyUnit,#pl-nwUnit,#pl-gwUnit,#pl-msUnit{text-align:center!important;text-align-last:center!important;}
   input::placeholder,textarea::placeholder{color:transparent!important;}
   [data-phide]{display:none!important;}
-  [class*="widget"],[id*="widget"],iframe,[class*="chat"],[id*="chat"]{display:none!important;}
+  *{-webkit-print-color-adjust:exact;}
+  body>*:not(.panel):not(.wrap){display:none!important;}
+  [class*="widget"],[class*="chat"],[class*="badge"],[class*="bubble"],[class*="launcher"],
+  [id*="widget"],[id*="chat"],[id*="launcher"],
+  iframe,img[src*="widget"],
+  div[style*="position: fixed"],div[style*="position:fixed"]{display:none!important;visibility:hidden!important;}
   @page{size:A4;margin:1.2cm;}
 }
 </style>
