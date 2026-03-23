@@ -429,7 +429,7 @@ textarea.fs.edited{border-color:#c86000!important;}
       <td colspan="2" style="vertical-align:top;padding:5px 6px;border-right:none;">
         <div style="margin-bottom:2px;display:flex;align-items:center;gap:4px;">
           <span style="font-weight:700;white-space:nowrap;">COMMODITY:</span>
-          <select class="fs" id="pl-comm" style="min-width:100px;font-size:11px;font-family:inherit;border:none;border-bottom:1px solid #1a7a1a;background:transparent;outline:none;" onchange="plManual(this)"></select>
+          <input class="fs" id="pl-comm" type="text" style="min-width:100px;font-size:11px;font-family:inherit;border:none;border-bottom:1px solid #1a7a1a;background:transparent;outline:none;" oninput="plManual(this)">
           <button class="abtn" onclick="openM('commodity')">관리</button>
         </div>
         <div style="margin-bottom:4px;"><span style="font-weight:700;">QUANTITY: </span>
@@ -797,6 +797,7 @@ function initCDrop(inputEl, getOpts){
   inputEl.addEventListener('blur',function(){setTimeout(function(){list.style.display='none';},150);});
   window.addEventListener('resize',function(){if(list.style.display!=='none')updatePos();});
   window.addEventListener('scroll',function(){if(list.style.display!=='none')updatePos();},true);
+  return list;
 }
 function showDrop(inputId){var inp=el(inputId);if(inp&&inp._cshow){inp.focus();inp._cshow();}}
 function initDropdowns(){
@@ -807,6 +808,7 @@ function initDropdowns(){
   initCDrop(el('pl-shipper'),function(){return (getL().shipper||[]).map(function(x){return x.n;});});
   initCDrop(el('pl-consignee'),function(){return (getL().consignee||[]).map(function(x){return x.n;});});
   initCDrop(el('pl-notify'),function(){return (getL().notify||[]).map(function(x){return x.n;});});
+  initCDrop(el('pl-comm'),function(){return getL().commodity||[];});
 }
 
 // PL 독립 사용 시 업체명 선택 → 주소 자동 채우기 (req 12)
@@ -845,7 +847,7 @@ function loadSels(){
   popSel('ci-pp',L.pricePort,false);
   popSel('ci-pc',L.priceCountry,false);popSel('ci-qtyUnit',L.qtyUnit,false);
   popSel('ci-cur',L.amtUnit,false);
-  popSel('pl-comm',L.commodity,false);popSel('pl-qtyUnit',L.qtyUnit,false);popSel('writer',L.writer,false);
+  popSel('pl-qtyUnit',L.qtyUnit,false);popSel('writer',L.writer,false);
   popSel('pl-gwUnit',L.gwUnit,false);
 }
 
@@ -1315,6 +1317,8 @@ function buildPLsheet(wb){
 
 // ── Multi-commodity (CI) ──
 var ciComms = [];
+var _ciCommDrops = [], _plCommDrops = [];
+function _cleanDrops(arr){arr.forEach(function(l){if(l&&l.parentNode)l.parentNode.removeChild(l);});arr.length=0;}
 
 function ciAddComm(d) {
   var L = getL();
@@ -1372,6 +1376,7 @@ function ciCalcMulti() {
 }
 
 function renderCIComms() {
+  _cleanDrops(_ciCommDrops);
   var nmEl = el('ci-nm');
   var savedNM = nmEl ? nmEl.value : null;
   var tb = el('ci-commBody');
@@ -1382,11 +1387,6 @@ function renderCIComms() {
 
   for (var i = 0; i < ciComms.length; i++) {
     var c = ciComms[i];
-    var commOpts = '';
-    var arr = L.commodity || [];
-    for (var j = 0; j < arr.length; j++) {
-      commOpts += '<option value="' + arr[j] + '"' + (arr[j] === c.comm ? ' selected' : '') + '>' + arr[j] + '</option>';
-    }
     var delBtn = ciComms.length > 1
       ? '<button class="abtn" style="background:#c0392b;margin-left:2px;font-size:9px;padding:1px 4px;" onclick="ciDelComm(' + i + ')">x</button>'
       : '';
@@ -1398,7 +1398,7 @@ function renderCIComms() {
     tr.innerHTML = nmHtml +
       '<td style="vertical-align:middle;padding:3px 5px;' + bdTop + '">' +
         (i === 0 ? '<b>COMMODITY:</b> ' : '<b style="color:#1a7a1a">&#8627;</b> ') +
-        '<select class="f" style="display:inline-block;width:auto;min-width:100px;font-size:11px;font-family:inherit;" onchange="ciCommInput(' + i + ',\'comm\',this.value)">' + commOpts + '</select>' +
+        '<input class="f ci-comm-inp" type="text" data-idx="' + i + '" value="' + (c.comm||'').replace(/"/g,'&quot;') + '" placeholder="Commodity" style="display:inline-block;width:auto;min-width:120px;font-size:11px;">' +
         '<button class="abtn" onclick="openM(\'commodity\')" style="font-size:9px;padding:1px 4px;">관리</button>' + delBtn +
       '</td>' +
       '<td style="text-align:center;vertical-align:middle;' + bdTop + '">' +
@@ -1412,6 +1412,14 @@ function renderCIComms() {
       '</td>';
     tb.appendChild(tr);
   }
+  // CI commodity autocomplete
+  tb.querySelectorAll('.ci-comm-inp').forEach(function(inp){
+    var idx=parseInt(inp.dataset.idx);
+    inp.addEventListener('input',function(){ciCommInput(idx,'comm',this.value);});
+    inp.addEventListener('change',function(){ciCommInput(idx,'comm',this.value);});
+    var dl=initCDrop(inp,function(){return getL().commodity||[];});
+    if(dl)_ciCommDrops.push(dl);
+  });
   // ci-nm 값 복원 및 높이 자동 조정
   var newNM = el('ci-nm');
   if (newNM) {
@@ -1465,6 +1473,7 @@ function plDelExtraComm(i) {
   sv();
 }
 function renderPLExtraComms() {
+  _cleanDrops(_plCommDrops);
   var L = getL();
   var div = el('pl-extra-comms');
   if (!div) return;
@@ -1486,7 +1495,7 @@ function renderPLExtraComms() {
     wrap.innerHTML =
       // Commodity row
       '<div style="display:flex;align-items:center;gap:4px;margin-bottom:2px;">' +
-        '<select class="fs" style="min-width:200px;font-size:11px;font-family:inherit;border:none;border-bottom:1px solid #1a7a1a;background:transparent;outline:none;" onchange="plExtraComms[' + idx2 + '].comm=this.value;sv();">' + commOpts + '</select>' +
+        '<input class="fs pl-comm-inp" type="text" data-idx="' + idx2 + '" value="' + (plExtraComms[idx2].comm||'').replace(/"/g,'&quot;') + '" placeholder="Commodity" style="min-width:200px;font-size:11px;font-family:inherit;border:none;border-bottom:1px solid #1a7a1a;background:transparent;outline:none;-webkit-text-fill-color:#1a7a1a;color:#1a7a1a;">' +
         '<button class="abtn no-print" onclick="openM(\'commodity\')" style="font-size:9px;padding:1px 4px;">관리</button>' +
         '<button class="abtn no-print" style="background:#c0392b;font-size:9px;padding:1px 4px;" onclick="plDelExtraComm(' + idx2 + ')">x</button>' +
       '</div>' +
@@ -1503,6 +1512,14 @@ function renderPLExtraComms() {
       '</div>';
     div.appendChild(wrap);
   }
+  // PL extra commodity autocomplete
+  div.querySelectorAll('.pl-comm-inp').forEach(function(inp){
+    var idx=parseInt(inp.dataset.idx);
+    inp.addEventListener('input',function(){plExtraComms[idx].comm=this.value;sv();});
+    inp.addEventListener('change',function(){plExtraComms[idx].comm=this.value;sv();});
+    var dl=initCDrop(inp,function(){return getL().commodity||[];});
+    if(dl)_plCommDrops.push(dl);
+  });
 }
 
 var curM=null;
