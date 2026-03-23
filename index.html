@@ -511,7 +511,7 @@ var DEF={
     {n:'PACIFIC BIO CO.,LTD',a:''},
     {n:'QINGDAO EASY-TECH IMP.&EXP. CO.,LTD',a:'RM A 903, ART& TECHNOLOGY SPACE, NO. 63, HAIER RD., LAOSHAN DISTRICT ,QINGDAO, CHINA'},
     {n:'SKP CHEMICAL CO.,LTD',a:'Level 5, Development Bank of Samoa Building, Beach Road, Apia, Samoa'},
-    {n:'SKP CHEMICAL LIMITED',a:''},
+    {n:'SKP CHEMICAL LIMITED',a:'FLAT/RM A 12/F, ZJ 300, 300 LOCKHART ROAD, WAN CHAI, HONG KONG'},
     {n:'TL HOLDINGS CO.,LTD',a:'NO.1403, NO.101 LOTTE CASTLE PRESIDENT BLDG.,467, GONGDEOK-DONG, MAPO-GU, SEOUL, KOREA'},
     {n:'TO THE ORDER OF INDUSTRIAL BANK OF KOREA',a:''}
   ],
@@ -524,6 +524,7 @@ var DEF={
     {n:'QINGDAO EASY-TECH IMP.&EXP. CO.,LTD',a:'RM A 903, ART& TECHNOLOGY SPACE, NO. 63, HAIER RD., LAOSHAN DISTRICT ,QINGDAO, CHINA YH INTERCOM Co., Ltd'},
     {n:'QINGDAO EASY-TECH IMP.&EXP. CO.,LTD.',a:'RM A 903, ART& TECHNOLOGY SPACE, NO. 63, HAIER RD., LAOSHAN DISTRICT ,QINGDAO, CHINA'},
     {n:'SINOWAY INTERNATIONAL (JIANGSU) CO., LTD.',a:'17 Beijing Road(west),Nanjing,China'},
+    {n:'SKP CHEMICAL LIMITED',a:'FLAT/RM A 12/F, ZJ 300, 300 LOCKHART ROAD, WAN CHAI, HONG KONG'},
     {n:'TK&CO',a:'RM904-1, MILLENNIUM PLAZA, #211-4, YONGJONG DONG, GYEYANG-GU, INCHEON, KOREA'},
     {n:'YH INTERCOM Co., Ltd',a:'Jandari ro 3 An gil 44, Mapo gu, Seoul, South Korea'}
   ],
@@ -556,7 +557,7 @@ var DEF={
     {n:'PACIFIC BIO CO.,LTD',a:''},
     {n:'QINGDAO EASY-TECH IMP.&EXP. CO.,LTD',a:'RM A 903, ART& TECHNOLOGY SPACE, NO. 63, HAIER RD., LAOSHAN DISTRICT ,QINGDAO, CHINA'},
     {n:'SKP CHEMICAL CO.,LTD',a:'Level 5, Development Bank of Samoa Building, Beach Road, Apia, Samoa'},
-    {n:'SKP CHEMICAL LIMITED',a:''},
+    {n:'SKP CHEMICAL LIMITED',a:'FLAT/RM A 12/F, ZJ 300, 300 LOCKHART ROAD, WAN CHAI, HONG KONG'},
     {n:'TL HOLDINGS CO.,LTD',a:'NO.1403, NO.101 LOTTE CASTLE PRESIDENT BLDG.,467, GONGDEOK-DONG, MAPO-GU, SEOUL, KOREA'},
     {n:'TO THE ORDER OF INDUSTRIAL BANK OF KOREA',a:''}
   ],
@@ -573,13 +574,14 @@ var DEF={
     {n:'LOTTE FOODS CO.,LTD',a:'10,YANGPYEONG-RO, 21GIL, YEONGDEUNGPO-GU, SEOUL, SOUTH KOREA'},
     {n:'MCO CORPORATION',a:''},
     {n:'OILTECH CO.,LTD',a:'18 SINCHEON-RO 25BEAN-GIL SIHEUNG-SI GYEONGGI-DO KOREA'},
+    {n:'SKP CHEMICAL LIMITED',a:'FLAT/RM A 12/F, ZJ 300, 300 LOCKHART ROAD, WAN CHAI, HONG KONG'},
     {n:'TL HOLDINGS CO.,LTD',a:'NO.1403, NO.101 LOTTE CASTLE PRESIDENT BLDG.,467, GONGDEOK-DONG, MAPO-GU, SEOUL, KOREA'},
     {n:'WRP Asia Pacific Sdn Bhd',a:'Lot 1, Jalan 3, Kawasan Perusahaan, Bandar Baru Salak Tinggi, 43900 Sepang, Selangor, Malaysia Mobile: +60 17 518 3533'}
   ],
   pol:['QINGDAO PORT, CHINA','SHANGHAI PORT, CHINA','BUSAN PORT, SOUTH KOREA'],
   dest:['BUSAN PORT, SOUTH KOREA','INCHEON PORT, SOUTH KOREA'],
-  commodity:['AMMONIUM THIOSULFATE SOLUTION(57%)','ANTIOXIDANT JYANOX-626','BUTYL DIGLYCOL ACETATE','CRUDE GLYCERINE','ETHYLENE UREA(E-215)','EXPANDED PERLITE','FUMED SILICA','GMS (Glycerol MonoStearate )','HEPTANOIC ACID','IPAC(ISOPROPYL ACETATE)','ISOPROPYL ACETATE','ISOPROPYL ALCOHOL','JYANOX-626','METHACRYLIC ACID','MIXED FATTY ACID','Monochloroacetic Acid','NBR LATEX-DJ301','NBR LATEX-QD101','NBR LATEX-QN03','PALM FATTY ACID','PEG-200','SILICA SOL HSD-10050','STEARIC ACID','STEARIC ACID 1838','Vanadium pentoxide powder99.6%','VEGETABLE PITCH','WATER BASED PU'],
-  packing:['IN FLEXIBAG','IN DRUM','IN IBC','IN BAG'],
+  commodity:['AMMONIUM THIOSULFATE SOLUTION(57%)','ANTIOXIDANT JYANOX-626','BUTYL DIGLYCOL ACETATE','CRUDE GLYCERINE','CYCLOHEXANONE','ETHYLENE UREA(E-215)','EXPANDED PERLITE','FUMED SILICA','GMS (Glycerol MonoStearate )','HEPTANOIC ACID','IPAC(ISOPROPYL ACETATE)','ISOPROPYL ACETATE','ISOPROPYL ALCOHOL','JYANOX-626','METHACRYLIC ACID','MIXED FATTY ACID','Monochloroacetic Acid','NBR LATEX-DJ301','NBR LATEX-QD101','NBR LATEX-QN03','PALM FATTY ACID','PEG-200','SILICA SOL HSD-10050','STEARIC ACID','STEARIC ACID 1838','Vanadium pentoxide powder99.6%','VEGETABLE PITCH','WATER BASED PU'],
+  packing:['IN FLEXIBAG','IN DRUM','IN IBC','IN ISOTANK','IN BAG'],
   origin:['CHINA','SOUTH KOREA','MALAYSIA','INDONESIA'],
   pricePort:['BUSAN','INCHEON','QINGDAO','SHANGHAI'],
   priceCountry:['SOUTH KOREA','CHINA','JAPAN','USA'],
@@ -601,6 +603,18 @@ function mergeDefaults(){
     if(!DEF[k])return;
     if(!L[k])L[k]=[];
     DEF[k].forEach(function(v){if(L[k].indexOf(v)<0){L[k].push(v);changed=true;}});
+  });
+  if(L.commodity){L.commodity.sort(function(a,b){return a.toLowerCase().localeCompare(b.toLowerCase());});changed=true;}
+  var objKeys=['to','shipper','consignee','notify'];
+  objKeys.forEach(function(k){
+    if(!DEF[k])return;
+    if(!L[k])L[k]=[];
+    DEF[k].forEach(function(dv){
+      var found=null;
+      for(var j=0;j<L[k].length;j++){if(L[k][j].n===dv.n){found=L[k][j];break;}}
+      if(!found){L[k].push(dv);changed=true;}
+      else if(!found.a&&dv.a){found.a=dv.a;changed=true;}
+    });
   });
   if(changed)saveL(L);
 }
@@ -848,7 +862,12 @@ function fillAddr(type){
   if(addrId){s(addrId, found ? (found.a||'') : '');}
 }
 
-function onSel(type){fillAddr(type);ciChanged();}
+function onSel(type){
+  if(type==='consignee'){s('ci-to',g('ci-consignee'));}
+  else if(type==='to'){s('ci-consignee',g('ci-to'));fillAddr('consignee');}
+  fillAddr(type);
+  ciChanged();
+}
 
 function fillAllAddrs(){
   var types=['shipper','consignee','notify'];
@@ -915,24 +934,24 @@ function renderCts(){
       '<input class="f" data-i="'+i+'" data-k="no" value="'+(c.no||'')+'" placeholder="CONTAINER NO./SEAL NO." style="text-transform:none;">'+
       '<button class="abtn" style="background:#c0392b;" onclick="delCt('+i+')">x</button></div></td>'+
       '<td style="text-align:right;padding:2px 4px;vertical-align:middle;"><input class="f" type="number" data-i="'+i+'" data-k="ctqty" value="'+(c.ctqty||'1')+'" style="text-align:right;width:36px;"></td>'+
-      '<td style="text-align:center;padding:2px 4px;"><input class="f" type="number" data-i="'+i+'" data-k="nw" value="'+(c.nw||'')+'" placeholder="0" style="text-align:center;width:80px;" oninput="plCalc()"></td>'+
-      '<td style="text-align:center;padding:2px 4px;"><input class="f" type="number" data-i="'+i+'" data-k="gw" value="'+(c.gw||'')+'" placeholder="0" style="text-align:center;width:80px;" oninput="plCalc()"></td>'+
-      '<td style="text-align:center;padding:2px 4px;"><input class="f" data-i="'+i+'" data-k="ms" value="'+(c.ms||'')+'" placeholder="22CBM" style="text-align:center;width:80px;" oninput="plCalc()"></td>';
+      '<td style="text-align:center;padding:2px 4px;"><input class="f" type="number" data-i="'+i+'" data-k="nw" value="'+(c.nw||'')+'" placeholder="0" style="text-align:center;width:80px;"></td>'+
+      '<td style="text-align:center;padding:2px 4px;"><input class="f" type="number" data-i="'+i+'" data-k="gw" value="'+(c.gw||'')+'" placeholder="0" style="text-align:center;width:80px;"></td>'+
+      '<td style="text-align:center;padding:2px 4px;"><input class="f" type="number" data-i="'+i+'" data-k="ms" value="'+(c.ms?parseFloat(c.ms)||'':'')+'" placeholder="0" style="text-align:center;width:80px;"></td>';
     tb.appendChild(tr);
   });
   tb.querySelectorAll('input').forEach(function(inp){
-    inp.addEventListener('input',function(){cts[+this.dataset.i][this.dataset.k]=this.value;sv();});
+    inp.addEventListener('input',function(){cts[+this.dataset.i][this.dataset.k]=this.value;plCalc();sv();});
   });
 }
 
 function plCalc(){
   var nwU=g('pl-nwUnit'),msU=g('pl-msUnit');
-  var tNW=0,tGW=0,tMS=0;
-  cts.forEach(function(c){tNW+=parseFloat(c.nw)||0;tGW+=parseFloat(c.gw)||0;tMS+=parseFloat(c.ms)||0;});
+  var tNW=0,tGW=0,tMS=0,tQTY=0;
+  cts.forEach(function(c){tNW+=parseFloat(c.nw)||0;tGW+=parseFloat(c.gw)||0;tMS+=parseFloat(c.ms)||0;tQTY+=parseFloat(c.ctqty)||0;});
   var qsEl=el('pl-qtyShow');
   if(qsEl&&!qsEl.dataset.m)qsEl.value=tNW>0?tNW.toLocaleString()+nwU:'';
   var tqEl=el('pl-tq'),tnEl=el('pl-tn'),tgEl=el('pl-tg'),tmEl=el('pl-tm');
-  if(tqEl&&!tqEl.dataset.m){var qU=g('pl-qtyUnit');tqEl.value=cts.length>0?cts.length+(qU&&qU!=='없음'?' '+qU:''):'';};
+  if(tqEl&&!tqEl.dataset.m){var qU=g('pl-qtyUnit');tqEl.value=tQTY>0?tQTY+(qU&&qU!=='없음'?' '+qU:''):'';};
   if(tnEl&&!tnEl.dataset.m)tnEl.value=tNW>0?tNW.toLocaleString()+' '+nwU:'';
   if(tgEl&&!tgEl.dataset.m)tgEl.value=tGW>0?tGW.toLocaleString()+' '+g('pl-gwUnit'):'';
   if(tmEl&&!tmEl.dataset.m)tmEl.value=tMS>0?tMS+msU:'';
