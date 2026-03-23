@@ -1,0 +1,1617 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Shipping Docs</title>
+<script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Malgun Gothic',sans-serif;background:#dde;font-size:12px;}
+#bar{background:#1a3a5c;color:white;padding:0 14px;display:flex;align-items:stretch;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.4);}
+.tabs{display:flex;align-items:stretch;}
+.app-ttl{font-size:13px;font-weight:700;display:flex;align-items:center;padding-right:14px;border-right:1px solid rgba(255,255,255,.15);}
+.tab{padding:0 22px;cursor:pointer;font-size:12px;font-weight:700;display:flex;align-items:center;border-bottom:3px solid transparent;color:#99b;}
+.tab:hover{background:rgba(255,255,255,.07);color:white;}
+.tab.on{border-bottom-color:#f90;color:white;background:rgba(255,255,255,.1);}
+.br{display:flex;align-items:center;gap:8px;padding:7px 0;}
+.br label{font-size:11px;color:#aac;}
+select.ws{padding:3px 6px;border-radius:3px;border:1px solid #4a7;background:#223;color:white;font-size:11px;}
+.btn{padding:5px 12px;border:none;border-radius:3px;cursor:pointer;font-size:11px;font-weight:700;}
+.bxl{background:#217346;color:white;}
+.bpdf{background:#c0392b;color:white;}
+.brs{background:#555;color:white;}
+.panel{display:none;} .panel.on{display:block;}
+.wrap{max-width:860px;margin:18px auto;background:white;border:1px solid #999;padding:16px;box-shadow:0 2px 10px rgba(0,0,0,.15);position:relative;}
+.orig{position:absolute;top:16px;right:16px;border:2px solid #111;padding:5px 14px;font-size:12px;font-weight:900;letter-spacing:2px;background:white;}
+.doch{text-align:center;font-size:17px;font-weight:900;letter-spacing:4px;padding:8px;margin-top:44px;margin-bottom:-1px;}
+table.t{width:100%;border-collapse:collapse;table-layout:fixed;}
+table.t td,table.t th{border:1px solid #888;padding:4px 6px;vertical-align:top;font-size:11px;overflow:hidden;word-break:break-word;}
+table.t th{background:#f0f0f0;font-weight:700;text-align:center;vertical-align:middle;}
+.lbl{font-weight:700;color:#222;display:block;margin-bottom:3px;font-size:10px;}
+.r2{display:flex;gap:4px;align-items:center;}
+
+/* Orange: user-editable inputs */
+input.f,select.f,textarea.f{
+  width:100%;border:none;border-bottom:1px solid #c86000;
+  font-family:inherit;font-size:11px;font-weight:700;
+  color:#c86000;-webkit-text-fill-color:#c86000;
+  background:transparent;outline:none;text-transform:uppercase;padding:1px 2px;
+}
+textarea.f{border:1px solid #c86000;resize:none;text-transform:none;}
+input.f:focus,select.f:focus,textarea.f:focus{background:#fff8f0;}
+select.f{text-transform:none;}
+input.f[type=number]{text-align:center;}
+
+/* Green: auto-synced from CI to PL */
+input.fs,textarea.fs{
+  width:100%;border:none;border-bottom:1px solid #1a7a1a;
+  font-family:inherit;font-size:11px;font-weight:700;
+  color:#1a7a1a;-webkit-text-fill-color:#1a7a1a;
+  background:transparent;outline:none;text-transform:uppercase;padding:1px 2px;
+}
+textarea.fs{border:1px solid #1a7a1a;resize:none;text-transform:none;}
+input.fs:focus,textarea.fs:focus{background:#f0fff0;}
+/* Green select: auto-synced (CI notify ← consignee) */
+select.fs{
+  width:100%;border:none;border-bottom:1px solid #1a7a1a;
+  font-family:inherit;font-size:11px;font-weight:700;
+  color:#1a7a1a;background:transparent;outline:none;padding:1px 2px;
+}
+select.fs:focus{background:#f0fff0;}
+/* When manually edited: orange */
+input.fs.edited,textarea.fs.edited,select.fs.edited{
+  color:#c86000!important;-webkit-text-fill-color:#c86000!important;
+  border-bottom-color:#c86000!important;
+}
+textarea.fs.edited{border-color:#c86000!important;}
+
+.cv{font-weight:700;color:#c86000;-webkit-text-fill-color:#c86000;font-size:11px;}
+.abtn{font-size:10px;padding:2px 6px;background:#1a3a5c;color:white;border:none;border-radius:2px;cursor:pointer;white-space:nowrap;}
+.ttr td{border:none!important;border-top:2px solid #444!important;text-align:center;font-weight:700;vertical-align:middle!important;}
+.pl-cargo-th th{vertical-align:top!important;}
+/* N/M area col1 in container rows: left+right borders only */
+#ctBody tr td:first-child{border-top:none!important;border-bottom:none!important;}
+.sgn{padding:80px 4px 6px;display:flex;justify-content:flex-end;align-items:flex-end;}
+.sgn span:first-child{font-weight:700;font-size:11px;margin-right:8px;}
+.sgn span:last-child{border-bottom:1px solid #333;width:220px;height:20px;display:inline-block;}
+.mov{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.4);z-index:200;align-items:center;justify-content:center;}
+.mov.on{display:flex;}
+.mbox{background:white;border-radius:6px;padding:18px;min-width:380px;max-width:480px;max-height:80vh;display:flex;flex-direction:column;}
+.mbox h3{font-size:13px;color:#1a3a5c;margin-bottom:10px;}
+.ml{overflow-y:auto;border:1px solid #ddd;border-radius:3px;margin-bottom:8px;flex:1;min-height:60px;}
+.mi{display:flex;justify-content:space-between;align-items:flex-start;padding:5px 8px;border-bottom:1px solid #eee;font-size:11px;}
+.mi:last-child{border-bottom:none;}
+.mi-l{flex:1;}.mi-n{font-weight:700;}.mi-a{font-size:9px;color:#777;margin-top:1px;}
+.mi-b{display:flex;gap:3px;flex-shrink:0;}
+.xb{background:none;border:none;cursor:pointer;font-size:13px;padding:0 3px;}
+.madd{display:flex;flex-direction:column;gap:5px;}
+.madd input,.madd textarea{padding:4px 6px;border:1px solid #ccc;border-radius:3px;font-size:11px;font-family:inherit;}
+.madd textarea{resize:none;}
+.mft{display:flex;justify-content:flex-end;margin-top:8px;gap:6px;}
+.actb{text-align:center;padding:4px;}
+.actb button{background:#1a5c3a;color:white;border:none;border-radius:3px;padding:3px 10px;font-size:11px;cursor:pointer;}
+
+/* Custom company-name dropdown (req 11) */
+.cdrop-list{position:fixed;z-index:9999;background:white;border:1px solid #bbb;border-radius:3px;max-height:180px;overflow-y:auto;font-family:'Malgun Gothic',sans-serif;font-size:11px;font-weight:700;min-width:160px;box-shadow:0 3px 8px rgba(0,0,0,.2);list-style:none;padding:0;margin:0;}
+.cdrop-item{padding:5px 8px;cursor:pointer;color:#c86000;text-transform:uppercase;border-bottom:1px solid #f0f0f0;}
+.cdrop-item:last-child{border-bottom:none;}
+.cdrop-item:hover{background:#fff8f0;}
+
+@media print{
+  #bar{display:none!important;}
+  body{background:white;}
+  .wrap{box-shadow:none;border:none;margin:0;max-width:100%;padding:8px;}
+  input.f,textarea.f,input.fs,textarea.fs{border:none!important;background:transparent!important;color:#000!important;-webkit-text-fill-color:#000!important;}
+  select.f,select.fs{-webkit-appearance:none;appearance:none;border:none!important;background:transparent!important;color:#000!important;-webkit-text-fill-color:#000!important;font-size:11px!important;font-family:inherit!important;font-weight:700!important;}
+  /* 수동 편집(주황색) 필드도 인쇄 시 검정색으로 */
+  input.fs.edited,textarea.fs.edited,select.fs.edited{color:#000!important;-webkit-text-fill-color:#000!important;border:none!important;}
+  .cv{color:#000!important;-webkit-text-fill-color:#000!important;}
+  .abtn,.actb,.no-print{display:none!important;}
+  #pl-tq{font-size:11px!important;width:100%!important;min-width:0!important;max-width:none!important;}
+  #pl-qtyUnit{font-size:11px!important;width:100%!important;max-width:none!important;}
+  /* Hide dropdown arrows in print */
+  select{-webkit-appearance:none!important;appearance:none!important;}
+  /* CI: center-align the 3 unit selects under 14/15/16 headers */
+  #ci-qtyUnit,#ci-upUnit,#ci-cur{text-align:center!important;text-align-last:center!important;width:auto!important;}
+  /* PL: center-align the 4 unit selects under 12/13/14/15 headers */
+  #pl-qtyUnit,#pl-nwUnit,#pl-gwUnit,#pl-msUnit{text-align:center!important;text-align-last:center!important;}
+  input::placeholder,textarea::placeholder{color:transparent!important;}
+  [data-phide]{display:none!important;}
+  @page{size:A4;margin:1.2cm;}
+}
+</style>
+</head>
+<body>
+<div id="bar">
+  <div class="tabs">
+    <div class="app-ttl">Shipping Docs</div>
+    <div class="tab on" id="tab-ci" onclick="showTab('ci')">Commercial Invoice (CI)</div>
+    <div class="tab" id="tab-pl" onclick="showTab('pl')">Packing List (PL)</div>
+  </div>
+  <div class="br">
+    <label>Writer:</label>
+    <select class="ws" id="writer"></select>
+    <button class="abtn" style="background:#4a8;" onclick="openM('writer')">관리</button>
+    <button class="btn bxl" onclick="doExcel()">Excel</button>
+    <button class="btn bpdf" onclick="window.print()">PDF</button>
+    <button class="btn brs" onclick="doReset()">Reset</button>
+  </div>
+</div>
+
+<!-- CI PANEL -->
+<div class="panel on" id="ci-panel">
+<div class="wrap">
+  <div class="orig">ORIGINAL</div>
+  <div class="doch">COMMERCIAL INVOICE</div>
+  <table class="t" style="width:100%;border-collapse:collapse;">
+    <colgroup><col style="width:25%"><col style="width:25%"><col style="width:50%"></colgroup>
+    <tr>
+      <td colspan="3" style="border:none;padding:4px 0;">
+        <div class="r2"><strong style="min-width:30px;">TO:</strong>
+          <input class="f" id="ci-to" placeholder="Company name" onchange="onSel('to')" style="flex:1;">
+          <button class="abtn" style="background:#667;padding:2px 4px;" onmousedown="event.preventDefault()" onclick="showDrop('ci-to')">▼</button>
+          <button class="abtn" onclick="openM('to')">관리</button>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2" rowspan="3" style="vertical-align:top;">
+        <span class="lbl">1. Shipper / Exporter:</span>
+        <div class="r2" style="margin-bottom:4px;">
+          <input class="f" id="ci-shipper" placeholder="Shipper / Exporter name" onchange="onSel('shipper')" style="flex:1;">
+          <button class="abtn" style="background:#667;padding:2px 4px;" onmousedown="event.preventDefault()" onclick="showDrop('ci-shipper')">▼</button>
+          <button class="abtn" onclick="openM('shipper')">관리</button>
+        </div>
+        <textarea class="f" id="ci-shipperAddr" rows="3" style="min-height:52px;" oninput="ciChanged()"></textarea>
+      </td>
+      <td>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span class="lbl">8. No. &amp; Date of Invoice</span>
+          <button class="abtn no-print" id="ci-invNoneBtn" onclick="noneToggle('inv')" style="background:#888;white-space:nowrap;">없음</button>
+        </div>
+        <div class="r2" id="ci-inv-content">
+          <input class="f" id="ci-invNo" placeholder="INVOICE NO." style="flex:2;" oninput="ciChanged()">
+          <input class="f" id="ci-invDate" placeholder="NOV. 20, 2025" style="flex:2;cursor:pointer;" readonly onclick="openDP('ci-invDate')">
+          <input type="date" id="dpci-invDate" style="display:none;" onchange="applyDP('ci-invDate')">
+          <button class="abtn" onclick="openDP('ci-invDate')">Cal</button>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span class="lbl">9. No. &amp; Date of L/C</span>
+          <button class="abtn no-print" id="ci-lcNoneBtn" onclick="noneToggle('lc')" style="background:#888;white-space:nowrap;">없음</button>
+        </div>
+        <div class="r2" id="ci-lc-content">
+          <input class="f" id="ci-lcNo" placeholder="L/C NO." style="flex:2;" oninput="sv()">
+          <input class="f" id="ci-lcDate" placeholder="NOV. 13, 2025" style="flex:2;cursor:pointer;" readonly onclick="openDP('ci-lcDate')">
+          <input type="date" id="dpci-lcDate" style="display:none;" onchange="applyDP('ci-lcDate')">
+          <button class="abtn" id="ci-lcCalBtn" onclick="openDP('ci-lcDate')">Cal</button>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span class="lbl">10. No. &amp; Date of Contract</span>
+          <button class="abtn no-print" id="ci-contractNoneBtn" onclick="noneToggle('contract')" style="background:#888;white-space:nowrap;">없음</button>
+        </div>
+        <div class="r2" id="ci-contract-content">
+          <input class="f" id="ci-contractNo" placeholder="CONTRACT NO." style="flex:2;" oninput="sv()">
+          <input class="f" id="ci-contractDate" placeholder="NOV. 11, 2025" style="flex:2;cursor:pointer;" readonly onclick="openDP('ci-contractDate')">
+          <input type="date" id="dpci-contractDate" style="display:none;" onchange="applyDP('ci-contractDate')">
+          <button class="abtn" onclick="openDP('ci-contractDate')">Cal</button>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2" rowspan="2" style="vertical-align:top;">
+        <span class="lbl">2. Consignee:</span>
+        <div class="r2" style="margin-bottom:4px;">
+          <input class="f" id="ci-consignee" placeholder="Consignee name" onchange="onSel('consignee')" style="flex:1;">
+          <button class="abtn" style="background:#667;padding:2px 4px;" onmousedown="event.preventDefault()" onclick="showDrop('ci-consignee')">▼</button>
+          <button class="abtn" onclick="openM('consignee')">관리</button>
+        </div>
+        <textarea class="f" id="ci-consigneeAddr" rows="3" style="min-height:52px;" oninput="ciChanged()"></textarea>
+      </td>
+      <td rowspan="4" style="vertical-align:top;border-bottom:none;">
+        <span class="lbl">11. Remark</span>
+        <textarea class="f" id="ci-remark" rows="11" style="min-height:200px;width:100%;"></textarea>
+      </td>
+    </tr>
+    <tr></tr>
+    <tr>
+      <td colspan="2" rowspan="2" style="vertical-align:top;">
+        <span class="lbl">3. Notify Party: <span class="no-print" style="font-weight:400;color:#1a7a1a;font-size:9px;">● Consignee 연동</span></span>
+        <div class="r2" style="margin-bottom:4px;">
+          <input class="fs" id="ci-notify" placeholder="Notify Party name" onchange="notifyManualSel(this)" style="flex:1;">
+          <button class="abtn" style="background:#667;padding:2px 4px;" onmousedown="event.preventDefault()" onclick="showDrop('ci-notify')">▼</button>
+          <button class="abtn" onclick="openM('notify')">관리</button>
+          <button class="abtn" style="background:#555;" onclick="notifyReset()" title="Consignee로 초기화">↺</button>
+        </div>
+        <textarea class="fs" id="ci-notifyAddr" rows="3" style="min-height:52px;" oninput="notifyManualAddr(this)"></textarea>
+      </td>
+    </tr>
+    <tr></tr>
+    <tr>
+      <td style="vertical-align:top;">
+        <span class="lbl">4. Port of Loading</span>
+        <div class="r2">
+          <select class="f" id="ci-pol" onchange="ciChanged()"></select>
+          <button class="abtn" onclick="openM('pol')">관리</button>
+        </div>
+      </td>
+      <td style="vertical-align:top;">
+        <span class="lbl">5. Final Destination</span>
+        <div class="r2">
+          <select class="f" id="ci-dest" onchange="ciChanged()"></select>
+          <button class="abtn" onclick="openM('dest')">관리</button>
+        </div>
+      </td>
+      <td style="border-left:none;border-top:none;border-bottom:none;border-right:1px solid #888;background:white;"></td>
+    </tr>
+    <tr>
+      <td style="vertical-align:top;">
+        <span class="lbl">6. Vessel / Voy. No.</span>
+        <input class="f" id="ci-vessel" placeholder="EASLINE DALIAN/2548E" oninput="ciChanged()">
+      </td>
+      <td style="vertical-align:top;">
+        <span class="lbl">7. Sailing on or About</span>
+        <div class="r2">
+          <input class="f" id="ci-sailing" placeholder="NOV. 30, 2025" style="cursor:pointer;" readonly onclick="openDP('ci-sailing')">
+          <input type="date" id="dpci-sailing" style="display:none;" onchange="applyDP('ci-sailing')">
+          <button class="abtn" onclick="openDP('ci-sailing')">Cal</button>
+        </div>
+      </td>
+      <td style="border-left:none;border-top:none;border-bottom:none;border-right:1px solid #888;background:white;"></td>
+    </tr>
+  </table>
+  <table class="t" style="margin-top:-1px;">
+    <colgroup><col style="width:15%"><col style="width:32%"><col style="width:18%"><col style="width:17.5%"><col style="width:17.5%"></colgroup>
+    <tr>
+      <th style="text-align:left;vertical-align:top;padding:3px 5px;">12. Marks &amp; No.<br>of PKGS</th>
+      <th style="text-align:left;vertical-align:top;padding:3px 5px;">13. Description of Goods</th>
+      <th style="text-align:left;vertical-align:top;padding:3px 5px;">14. Quantity<br>
+        <div class="r2" style="justify-content:center;margin-top:3px;">
+          <select class="f" id="ci-qtyUnit" style="flex:1;min-width:0;font-size:11px;" onchange="ciCalc()"></select>
+          <button class="abtn" onclick="openM('qtyUnit')">+</button>
+        </div>
+      </th>
+      <th style="text-align:left;vertical-align:top;padding:3px 5px;">15. Unit Price<br>
+        <div class="r2" style="justify-content:center;margin-top:3px;">
+          <select class="f" id="ci-upUnit" style="flex:1;min-width:0;font-size:11px;" onchange="ciCalc()"><option>USD/MT</option><option>USD/KG</option><option>USD/PCS</option></select>
+          <button class="abtn" onclick="openM('upUnit')">+</button>
+        </div>
+      </th>
+      <th style="text-align:left;vertical-align:top;padding:3px 5px;">16. Amount<br>
+        <div class="r2" style="justify-content:center;margin-top:3px;">
+          <select class="f" id="ci-cur" style="width:52px;" onchange="ciCalc()"></select>
+          <button class="abtn" onclick="openM('amtUnit')">+</button>
+        </div>
+      </th>
+    </tr>
+    <tr>
+      <td colspan="2" style="text-align:right;font-weight:700;vertical-align:middle;border-right:none;padding-right:8px;">PRICE TERMS:</td>
+      <td colspan="3" style="border-left:none;">
+        <div class="r2" style="flex-wrap:wrap;">
+          <select class="f" id="ci-pt" style="width:46px;"><option>CIF</option><option>CFR</option><option>FOB</option></select>
+          <select class="f" id="ci-pp" style="width:68px;"></select>
+          <button class="abtn" onclick="openM('pricePort')">관리</button>
+          <span style="font-weight:700;">PORT,</span>
+          <select class="f" id="ci-pc" style="min-width:80px;flex:1;"></select>
+          <button class="abtn" onclick="openM('priceCountry')">관리</button>
+        </div>
+      </td>
+    </tr>
+    <tbody id="ci-commBody"></tbody>
+    <tr class="ttr">
+      <td colspan="2" style="text-align:center;font-weight:700;">TOTAL</td>
+      <td id="ci-tq" style="color:#111;font-weight:700;text-align:center;"></td>
+      <td id="ci-tu" style="color:#111;font-weight:700;text-align:center;"></td>
+      <td id="ci-ta" style="color:#111;font-weight:700;text-align:center;"></td>
+    </tr>
+  </table>
+  <div class="sgn"><span>Signed by</span><span></span></div>
+</div>
+</div>
+
+<!-- PL PANEL -->
+<div class="panel" id="pl-panel">
+<div class="wrap">
+  <div class="orig">ORIGINAL</div>
+  <div class="doch">PACKING LIST</div>
+  <table class="t" style="width:100%;border-collapse:collapse;">
+    <colgroup><col style="width:25%"><col style="width:25%"><col style="width:50%"></colgroup>
+    <tr>
+      <td colspan="2" rowspan="2" style="vertical-align:top;">
+        <span class="lbl">1. Shipper / Exporter:</span>
+        <div class="r2" style="margin-bottom:4px;">
+          <input class="fs" id="pl-shipper" placeholder="auto from CI" oninput="plNameChanged(this,'pl-shipperAddr')" onchange="plOnSel('shipper')" style="flex:1;">
+          <button class="abtn" style="background:#667;padding:2px 4px;" onmousedown="event.preventDefault()" onclick="showDrop('pl-shipper')">▼</button>
+          <button class="abtn" onclick="openM('shipper')">관리</button>
+        </div>
+        <textarea class="fs" id="pl-shipperAddr" rows="3" style="min-height:52px;" oninput="plManual(this)"></textarea>
+      </td>
+      <td>
+        <span class="lbl">8. No. &amp; Date of Invoice</span>
+        <div class="r2">
+          <input class="fs" id="pl-invNo" style="flex:2;" oninput="plManual(this)">
+          <input class="fs" id="pl-invDate" style="flex:2;" oninput="plManual(this)">
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td rowspan="5" style="vertical-align:top;border-bottom:none;">
+        <span class="lbl">9. Remarks</span>
+        <textarea class="f" id="pl-remark" rows="11" style="min-height:200px;width:100%;"></textarea>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2" rowspan="2" style="vertical-align:top;">
+        <span class="lbl">2. Consignee:</span>
+        <div class="r2" style="margin-bottom:4px;">
+          <input class="fs" id="pl-consignee" placeholder="auto from CI" oninput="plNameChanged(this,'pl-consigneeAddr')" onchange="plOnSel('consignee')" style="flex:1;">
+          <button class="abtn" style="background:#667;padding:2px 4px;" onmousedown="event.preventDefault()" onclick="showDrop('pl-consignee')">▼</button>
+          <button class="abtn" onclick="openM('consignee')">관리</button>
+        </div>
+        <textarea class="fs" id="pl-consigneeAddr" rows="3" style="min-height:52px;" oninput="plManual(this)"></textarea>
+      </td>
+    </tr>
+    <tr></tr>
+    <tr>
+      <td colspan="2" rowspan="2" style="vertical-align:top;">
+        <span class="lbl">3. Notify Party:</span>
+        <div class="r2" style="margin-bottom:4px;">
+          <input class="fs" id="pl-notify" placeholder="auto from CI" oninput="plNameChanged(this,'pl-notifyAddr')" onchange="plOnSel('notify')" style="flex:1;">
+          <button class="abtn" style="background:#667;padding:2px 4px;" onmousedown="event.preventDefault()" onclick="showDrop('pl-notify')">▼</button>
+          <button class="abtn" onclick="openM('notify')">관리</button>
+        </div>
+        <textarea class="fs" id="pl-notifyAddr" rows="3" style="min-height:52px;" oninput="plManual(this)"></textarea>
+      </td>
+    </tr>
+    <tr></tr>
+    <tr>
+      <td style="vertical-align:top;border-right:none;">
+        <span class="lbl">4. Port of Loading</span>
+        <input class="fs" id="pl-pol" oninput="plManual(this)">
+      </td>
+      <td style="vertical-align:top;">
+        <span class="lbl">5. Final Destination</span>
+        <input class="fs" id="pl-dest" oninput="plManual(this)">
+      </td>
+      <td style="border-left:none;border-top:none;border-bottom:none;border-right:1px solid #888;background:white;"></td>
+    </tr>
+    <tr>
+      <td style="vertical-align:top;border-right:none;">
+        <span class="lbl">6. Vessel / Voy. No.</span>
+        <input class="fs" id="pl-vessel" oninput="plManual(this)">
+      </td>
+      <td style="vertical-align:top;">
+        <span class="lbl">7. Sailing on or About</span>
+        <input class="fs" id="pl-sailing" oninput="plManual(this)">
+      </td>
+      <td style="border-left:none;border-top:none;border-bottom:none;border-right:1px solid #888;background:white;"></td>
+    </tr>
+  </table>
+  <table class="t" style="margin-top:-1px;">
+    <colgroup><col style="width:15%"><col style="width:31%"><col style="width:16%"><col style="width:13%"><col style="width:15%"><col style="width:10%"></colgroup>
+    <tr class="pl-cargo-th">
+      <th style="font-size:9.5px;vertical-align:top;padding:2px 3px;text-align:left;">10. Marks &amp;<br>No. of PKGS</th>
+      <th style="font-size:9.5px;vertical-align:top;padding:2px 3px;text-align:left;">11. Description of Goods</th>
+      <th style="text-align:left;font-size:9.5px;vertical-align:top;padding:2px 2px;">12. QTY<br>
+        <div class="r2" style="justify-content:center;margin-top:2px;">
+          <select class="f" id="pl-qtyUnit" style="flex:1;min-width:0;font-size:11px;" onchange="plCalc()"></select>
+          <button class="abtn" style="background:#1a5c3a;" onclick="openM('qtyUnit')">+</button>
+        </div>
+      </th>
+      <th style="text-align:center;font-size:9.5px;vertical-align:top;padding:2px 2px;vertical-align:middle;">13. NET WEIGHT<br>
+        <div class="r2" style="justify-content:center;margin-top:2px;">
+          <select class="f" id="pl-nwUnit" onchange="plCalc()"><option>KGS</option><option>MT</option><option>KG</option></select>
+          <button class="abtn" style="background:#1a5c3a;" onclick="openM('nwUnit')">+</button>
+        </div>
+      </th>
+      <th style="text-align:center;font-size:9.5px;vertical-align:top;padding:2px 2px;vertical-align:middle;">14. GROSS WEIGHT<br>
+        <div class="r2" style="justify-content:center;margin-top:2px;">
+          <select class="f" id="pl-gwUnit" onchange="plCalc()"></select>
+          <button class="abtn" style="background:#1a5c3a;" onclick="openM('gwUnit')">+</button>
+        </div>
+      </th>
+      <th style="text-align:left;font-size:9.5px;vertical-align:top;padding:2px 2px;">15. MEAS.<br>
+        <div class="r2" style="justify-content:center;margin-top:2px;">
+          <select class="f" id="pl-msUnit" onchange="plCalc()"><option>CBM</option><option>CFT</option></select>
+          <button class="abtn" style="background:#1a5c3a;" onclick="openM('msUnit')">+</button>
+        </div>
+      </th>
+    </tr>
+    <tr>
+      <td rowspan="99" style="text-align:center;vertical-align:top;padding:4px 2px;font-weight:700;color:#111;border-top:none;border-bottom:none;"><textarea class="f" id="pl-nm" style="text-align:center;font-weight:700;color:#111;-webkit-text-fill-color:#111;width:100%;height:auto;min-height:60px;border:none;resize:none;overflow:hidden;display:block;" oninput="autoResize(this);sv();">N/M</textarea></td>
+      <td colspan="2" style="vertical-align:top;padding:5px 6px;border-right:none;">
+        <div style="margin-bottom:2px;display:flex;align-items:center;gap:4px;">
+          <span style="font-weight:700;white-space:nowrap;">COMMODITY:</span>
+          <input class="fs" id="pl-comm" type="text" style="min-width:100px;font-size:11px;font-family:inherit;border:none;border-bottom:1px solid #1a7a1a;background:transparent;outline:none;" oninput="plManual(this)">
+          <button class="abtn" onclick="openM('commodity')">관리</button>
+        </div>
+        <div style="margin-bottom:4px;"><span style="font-weight:700;">QUANTITY: </span>
+          <input class="f" id="pl-qtyShow" type="text" style="display:inline-block;width:100px;" oninput="this.dataset.m='1';sv();" onblur="if(!this.value.trim()){delete this.dataset.m;plCalc();}">
+        </div>
+        <div><span style="font-weight:700;">PACKING: </span>
+          <input class="fs" id="pl-packing" style="display:inline-block;width:auto;min-width:110px;vertical-align:bottom;" oninput="plManual(this)">
+        </div>
+      </td>
+      <td style="border:none;vertical-align:top;padding:3px 4px;"><div id="pl-extra-comms" style="position:relative;z-index:1;"></div></td><td style="border:none;"></td><td style="border-left:none;border-top:none;border-bottom:none;border-right:1px solid #888;"></td>
+    </tr>
+    <tbody id="pl-extra-comm-rows"></tbody>
+    <tr>
+      <td style="border-left:1px solid #888;border-right:1px solid #888;border-top:none;border-bottom:none;background:white;"></td>
+      <td style="font-weight:700;font-size:10px;border-top:none;">CONTAINER NO./SEAL NO.</td>
+      <td style="font-weight:700;text-align:center;font-size:9px;">QTY</td>
+      <td style="font-weight:700;text-align:center;font-size:10px;">NET WT</td>
+      <td style="font-weight:700;text-align:center;font-size:10px;">GROSS WT</td>
+      <td style="font-weight:700;text-align:center;font-size:10px;">MEAS.</td>
+    </tr>
+    <tbody id="ctBody"></tbody>
+    <tr class="no-print"><td style="border-left:1px solid #888;border-right:1px solid #888;border-top:none;border-bottom:none;background:white;"></td><td></td><td colspan="4" class="actb"><button onclick="addCt()">+ Container</button></td></tr>
+    <tr class="ttr">
+      <td style="border-left:1px solid #888;border-right:1px solid #888;border-top:2px solid #444;border-bottom:1px solid #888;background:white;"></td>
+      <td style="text-align:center;font-weight:700;">TOTAL</td>
+      <td style="text-align:right;padding:2px 4px;vertical-align:middle;"><input class="f" id="pl-tq" type="text" style="text-align:right;font-weight:700;font-size:10px;width:100%;" oninput="this.dataset.m='1';sv();"></td>
+      <td style="padding:2px 4px;"><input class="f" id="pl-tn" type="text" style="text-align:center;font-weight:700;" oninput="this.dataset.m='1';sv();"></td>
+      <td style="padding:2px 4px;"><input class="f" id="pl-tg" type="text" style="text-align:center;font-weight:700;" oninput="this.dataset.m='1';sv();"></td>
+      <td style="padding:2px 4px;"><input class="f" id="pl-tm" type="text" style="text-align:center;font-weight:700;" oninput="this.dataset.m='1';sv();"></td>
+    </tr>
+  </table>
+  <div class="sgn"><span>Signed by</span><span></span></div>
+</div>
+</div>
+
+<div class="mov" id="modal">
+  <div class="mbox">
+    <h3 id="mTit">Manage</h3>
+    <div class="ml" id="mList"></div>
+    <div class="madd">
+      <input type="text" id="mName" placeholder="Name / Item">
+      <textarea id="mAddr" rows="2" placeholder="Address (for company only)" style="display:none;"></textarea>
+      <button class="btn bxl" onclick="mAdd()" style="align-self:flex-end;">Add</button>
+    </div>
+    <div class="mft"><button class="btn brs" onclick="closeM()">Close</button></div>
+  </div>
+</div>
+
+<script>
+var SK='SD_CLEAN_1', LK='SD_LIST_CLEAN_1';
+var OBJ=['to','shipper','consignee','notify'];
+var DEF={
+  to:[
+    {n:'AEKYUNG PETROCHEMICAL',a:'81， SANGGAE RO, MAM-GU, ULSAN ,KOREA'},
+    {n:'AERO Thermal Insulation',a:'506-2 5F, Pangyo Urim W-City 9-22, Pangyo-ro 255beon-gil, Bundang-gu, Seongnam-si, Gyeonggi-do, Republic of Korea'},
+    {n:'ALTAIR-AUTO GMBH',a:'692770, Russian Federation, Artem, Tulskaya str, 20'},
+    {n:'ATCHEM',a:'F722, HAUSD.SMARTVALLEY, 16, MISAGANGBYEONSEO- RO, HANAM-SI, GYEONGGI-DO, 12918, KOREA'},
+    {n:'BLUE CHEM TECH CO.,LTD',a:''},
+    {n:'CET CO.,LTD',a:'36-30, 7-RO 5-GONGDAN,GUMI, KYUNGSANGBUKDO, KOREA'},
+    {n:'CHEMIWAY CO., LTD.',a:'#626, 358-39, HOSU-RO, ILSANDONG-GU, GOYANG-SI, GYEONGGI-DO, KOREA'},
+    {n:'CHEMTREE CORPORATION CO.,LTD',a:'UITE 1013, 358-39, HOSU-RO, ILSANDONG-GU, GOYANG-SI, GYEONGGI-DO, KOREA'},
+    {n:'Chemtree Corportion co.,ltd',a:'#913, 672, Hosu-ro, Ilsandong-gu, Goyang-si, Gyeonggi-do, Korea'},
+    {n:'CHEMTRONICS CO.,LTD',a:'31BAEIL-GIL JEONDONGP-MYEON SEJONG-SI 339-841, SOUTH KOREA'},
+    {n:'CHEMWAY CO.,LTD',a:'#626, DONGMOON TOWER 1ST, 358-39, HOSU-RO, ILSANDONG-GU, GOYANG-SI, GYEONGGI-DO, KOREA'},
+    {n:'GKF CO.,LTD',a:'110, EUTTEUM-RO, DEOGANG-GU, GOYANG-SI, GYEONGGI- DO, REPUBLIC OF KOREA 10543'},
+    {n:'GKFOUDATION',a:'65， WORLD CUP BUK-RO, 2GIL, MAPO-GU, SEOUL, KOREA'},
+    {n:'GREEN CHEMICAL CO., LTD',a:'103, DOKGOT 2-RO, DAESAN-EUP, SEOSAN-SI, CHUNGCHEONGNAM-DO, SOUTH KOREA'},
+    {n:'HIGH LOGISTICS LIMITED PARTNERSHIP',a:'SUIT 260, 2323-32, AVENUE N.E. CALGARY, ALBERTA T2E 6Z3, CANADA'},
+    {n:'INDUSTRIAL BANK OF KOREA',a:''},
+    {n:'ISU EXACHEM CO.,LTD',a:'ISU CHEMICAL BLDG.84, SAPYEONG-DAERO, SEOCHO-GU, SEOUL ,KOREA'},
+    {n:'KYUNGSAN CNT',a:'20-2, HEUNGAN-DAERO 439BEON-GIL, DONGAN-GU, ANYANG-SI, GYEONGGI-DO, KOREA'},
+    {n:'LG H&H CO.,LTD',a:'LG GWANGHWAMOON BUILDING, 92, SINMUNNO2GA, JONGNO-GU, SEOUL 110-062, KOREA'},
+    {n:'LOTTE CHEMICAL CORP.',a:'15FL, LOTTE WORLD TOWER, 300,OLYMPIC-RO, SONGPA-GU, SEOUL, 05551KOREA'},
+    {n:'MCO CORPORATION',a:'704, 68 DIGITAL-RO, GEUMCHEON-GU, SEOUL, REPUBLIC OF KOREA'},
+    {n:'MedtechBOSS Pte Ltd',a:'2985 Jalan Bukit Merah, #01-1C, Singapore Manufacturing Federation, Singapore 159457'},
+    {n:'MEK INDUSTRIAL TECHNOLOGY PTE. LTD.',a:'176 JOO CHIAT ROAD #02-02 SINGAPORE 427447'},
+    {n:'NOROO Paint & Coatings co.,Ltd.',a:'615, Bakdal 2-Dong, Man An-Gu, Anyang-Si Gyeonggi-Do, 430-849, Korea'},
+    {n:'NOROO PAINT& COATINGS CO.,LTD',a:'615, Bakdal 2-Dong, Man An-Gu, Anyang-Si Gyeonggi-Do, 430-849, Korea Korea'},
+    {n:'PACIFIC BIO CO.,LTD',a:''},
+    {n:'QINGDAO EASY-TECH IMP.&EXP. CO.,LTD',a:'RM A 903, ART& TECHNOLOGY SPACE, NO. 63, HAIER RD., LAOSHAN DISTRICT ,QINGDAO, CHINA'},
+    {n:'SKP CHEMICAL CO.,LTD',a:'Level 5, Development Bank of Samoa Building, Beach Road, Apia, Samoa'},
+    {n:'SKP CHEMICAL LIMITED',a:'FLAT/RM A 12/F, ZJ 300, 300 LOCKHART ROAD, WAN CHAI, HONG KONG'},
+    {n:'TL HOLDINGS CO.,LTD',a:'NO.1403, NO.101 LOTTE CASTLE PRESIDENT BLDG.,467, GONGDEOK-DONG, MAPO-GU, SEOUL, KOREA'},
+    {n:'TO THE ORDER OF INDUSTRIAL BANK OF KOREA',a:''}
+  ],
+  shipper:[
+    {n:'EASY-TECH',a:'RM904-1, MILLENNIUM PLAZA, #211-4, YONGJONG DONG, GYEYANG-GU, INCHEON, KOREA'},
+    {n:'GS GLOBAL CORP',a:'10th fl, GS TOWER 508 NONHYEON-RO GANGNAM-GU'},
+    {n:'HEBEI KEZHENG CHEMICAL CO., LTD.',a:''},
+    {n:'ISU EXACHEM CO.,LTD',a:''},
+    {n:'KITTY AILUODE CO.,LTD',a:'SHANGHAI PUDONG ZHULIN ROAD 101#2L SHANGHAI 200122CN'},
+    {n:'QINGDAO EASY-TECH IMP.&EXP. CO.,LTD',a:'RM A 903, ART& TECHNOLOGY SPACE, NO. 63, HAIER RD., LAOSHAN DISTRICT ,QINGDAO, CHINA YH INTERCOM Co., Ltd'},
+    {n:'QINGDAO EASY-TECH IMP.&EXP. CO.,LTD.',a:'RM A 903, ART& TECHNOLOGY SPACE, NO. 63, HAIER RD., LAOSHAN DISTRICT ,QINGDAO, CHINA'},
+    {n:'SINOWAY INTERNATIONAL (JIANGSU) CO., LTD.',a:'17 Beijing Road(west),Nanjing,China'},
+    {n:'SKP CHEMICAL LIMITED',a:'FLAT/RM A 12/F, ZJ 300, 300 LOCKHART ROAD, WAN CHAI, HONG KONG'},
+    {n:'TK&CO',a:'RM904-1, MILLENNIUM PLAZA, #211-4, YONGJONG DONG, GYEYANG-GU, INCHEON, KOREA'},
+    {n:'YH INTERCOM Co., Ltd',a:'Jandari ro 3 An gil 44, Mapo gu, Seoul, South Korea'}
+  ],
+  consignee:[
+    {n:'AEKYUNG PETROCHEMICAL',a:'81， SANGGAE RO, MAM-GU, ULSAN ,KOREA'},
+    {n:'AERO Thermal Insulation',a:'506-2 5F, Pangyo Urim W-City 9-22, Pangyo-ro 255beon-gil, Bundang-gu, Seongnam-si, Gyeonggi-do, Republic of Korea'},
+    {n:'ALTAIR-AUTO GMBH',a:'692770, Russian Federation, Artem, Tulskaya str, 20'},
+    {n:'ATCHEM',a:'F722, HAUSD.SMARTVALLEY, 16, MISAGANGBYEONSEO- RO, HANAM-SI, GYEONGGI-DO, 12918, KOREA'},
+    {n:'BLUE CHEM TECH CO.,LTD',a:''},
+    {n:'CET CO.,LTD',a:'36-30, 7-RO 5-GONGDAN,GUMI, KYUNGSANGBUKDO, KOREA'},
+    {n:'CHEMIWAY CO., LTD.',a:'#626, 358-39, HOSU-RO, ILSANDONG-GU, GOYANG-SI, GYEONGGI-DO, KOREA'},
+    {n:'CHEMTREE CORPORATION CO.,LTD',a:'UITE 1013, 358-39, HOSU-RO, ILSANDONG-GU, GOYANG-SI, GYEONGGI-DO, KOREA'},
+    {n:'Chemtree Corportion co.,ltd',a:'#913, 672, Hosu-ro, Ilsandong-gu, Goyang-si, Gyeonggi-do, Korea'},
+    {n:'CHEMTRONICS CO.,LTD',a:'31BAEIL-GIL JEONDONGP-MYEON SEJONG-SI 339-841, SOUTH KOREA'},
+    {n:'CHEMWAY CO.,LTD',a:'#626, DONGMOON TOWER 1ST, 358-39, HOSU-RO, ILSANDONG-GU, GOYANG-SI, GYEONGGI-DO, KOREA'},
+    {n:'GKF CO.,LTD',a:'110, EUTTEUM-RO, DEOGANG-GU, GOYANG-SI, GYEONGGI- DO, REPUBLIC OF KOREA 10543'},
+    {n:'GKFOUDATION',a:'65， WORLD CUP BUK-RO, 2GIL, MAPO-GU, SEOUL, KOREA'},
+    {n:'GREEN CHEMICAL CO., LTD',a:'103, DOKGOT 2-RO, DAESAN-EUP, SEOSAN-SI, CHUNGCHEONGNAM-DO, SOUTH KOREA'},
+    {n:'HIGH LOGISTICS LIMITED PARTNERSHIP',a:'SUIT 260, 2323-32, AVENUE N.E. CALGARY, ALBERTA T2E 6Z3, CANADA'},
+    {n:'INDUSTRIAL BANK OF KOREA',a:''},
+    {n:'ISU EXACHEM CO.,LTD',a:'ISU CHEMICAL BLDG.84, SAPYEONG-DAERO, SEOCHO-GU, SEOUL ,KOREA'},
+    {n:'KYUNGSAN CNT',a:'20-2, HEUNGAN-DAERO 439BEON-GIL, DONGAN-GU, ANYANG-SI, GYEONGGI-DO, KOREA'},
+    {n:'LG H&H CO.,LTD',a:'LG GWANGHWAMOON BUILDING, 92, SINMUNNO2GA, JONGNO-GU, SEOUL 110-062, KOREA'},
+    {n:'LOTTE CHEMICAL CORP.',a:'15FL, LOTTE WORLD TOWER, 300,OLYMPIC-RO, SONGPA-GU, SEOUL, 05551KOREA'},
+    {n:'MCO CORPORATION',a:'704, 68 DIGITAL-RO, GEUMCHEON-GU, SEOUL, REPUBLIC OF KOREA'},
+    {n:'MedtechBOSS Pte Ltd',a:'2985 Jalan Bukit Merah, #01-1C, Singapore Manufacturing Federation, Singapore 159457'},
+    {n:'MEK INDUSTRIAL TECHNOLOGY PTE. LTD.',a:'176 JOO CHIAT ROAD #02-02 SINGAPORE 427447'},
+    {n:'NOROO Paint & Coatings co.,Ltd.',a:'615, Bakdal 2-Dong, Man An-Gu, Anyang-Si Gyeonggi-Do, 430-849, Korea'},
+    {n:'NOROO PAINT& COATINGS CO.,LTD',a:'615, Bakdal 2-Dong, Man An-Gu, Anyang-Si Gyeonggi-Do, 430-849, Korea Korea'},
+    {n:'PACIFIC BIO CO.,LTD',a:''},
+    {n:'QINGDAO EASY-TECH IMP.&EXP. CO.,LTD',a:'RM A 903, ART& TECHNOLOGY SPACE, NO. 63, HAIER RD., LAOSHAN DISTRICT ,QINGDAO, CHINA'},
+    {n:'SKP CHEMICAL CO.,LTD',a:'Level 5, Development Bank of Samoa Building, Beach Road, Apia, Samoa'},
+    {n:'SKP CHEMICAL LIMITED',a:'FLAT/RM A 12/F, ZJ 300, 300 LOCKHART ROAD, WAN CHAI, HONG KONG'},
+    {n:'TL HOLDINGS CO.,LTD',a:'NO.1403, NO.101 LOTTE CASTLE PRESIDENT BLDG.,467, GONGDEOK-DONG, MAPO-GU, SEOUL, KOREA'},
+    {n:'TO THE ORDER OF INDUSTRIAL BANK OF KOREA',a:''}
+  ],
+  notify:[
+    {n:'AERO Thermal Insulation',a:'506-2 5F, Pangyo Urim W-City 9-22, Pangyo-ro 255beon-gil, Bundang-gu, Seongnam-si, Gyeonggi-do, Republic of Korea'},
+    {n:'CHEMIWAY CO., LTD.',a:'#626, 358-39, HOSU-RO, ILSANDONG-GU, GOYANG-SI, GYEONGGI-DO, KOREA'},
+    {n:'DAE HO CHEM CO.,LTD',a:'#701 SAMLAMIDAS, 590-2 SEONGSAN 2-DONG, MAPO-GU, SEOUL,KOREA'},
+    {n:'GKF CO.,LTD',a:'110, EUTTEUM-RO, DEOGANG-GU, GOYANG-SI, GYEONGGI- DO, REPUBLIC OF KOREA 10543'},
+    {n:'GREEN CHEMICAL CO., LTD',a:'103, DOKGOT 2-RO, DAESAN-EUP, SEOSAN-SI, CHUNGCHEONGNAM-DO, SOUTH KOREA'},
+    {n:'HIGH LOGISTICS LIMITED PARTNERSHIP',a:'SUIT 260, 2323-32, AVENUE N.E. CALGARY, ALBERTA T2E 6Z3, CANADA'},
+    {n:'ISU EXACHEM CO.,LTD',a:'ISU CHEMICAL BLDG.84, SAPYEONG-DAERO, SEOCHO-GU, SEOUL ,KOREA'},
+    {n:'JSC CO.,LTD.',a:'727, HYUNDAI PARKVILE, GURO-DONG, 41, GONGWEN-RO, GURO-GU, SEOUL, KOREA'},
+    {n:'LOTTE CHEMICAL CORP.',a:'15FL, LOTTE WORLD TOWER, 300,OLYMPIC-RO, SONGPA-GU, SEOUL, 05551KOREA'},
+    {n:'LOTTE FOODS CO.,LTD',a:'10,YANGPYEONG-RO, 21GIL, YEONGDEUNGPO-GU, SEOUL, SOUTH KOREA'},
+    {n:'MCO CORPORATION',a:''},
+    {n:'OILTECH CO.,LTD',a:'18 SINCHEON-RO 25BEAN-GIL SIHEUNG-SI GYEONGGI-DO KOREA'},
+    {n:'SKP CHEMICAL LIMITED',a:'FLAT/RM A 12/F, ZJ 300, 300 LOCKHART ROAD, WAN CHAI, HONG KONG'},
+    {n:'TL HOLDINGS CO.,LTD',a:'NO.1403, NO.101 LOTTE CASTLE PRESIDENT BLDG.,467, GONGDEOK-DONG, MAPO-GU, SEOUL, KOREA'},
+    {n:'WRP Asia Pacific Sdn Bhd',a:'Lot 1, Jalan 3, Kawasan Perusahaan, Bandar Baru Salak Tinggi, 43900 Sepang, Selangor, Malaysia Mobile: +60 17 518 3533'}
+  ],
+  pol:['QINGDAO PORT, CHINA','SHANGHAI PORT, CHINA','BUSAN PORT, SOUTH KOREA'],
+  dest:['BUSAN PORT, SOUTH KOREA','INCHEON PORT, SOUTH KOREA'],
+  commodity:['AMMONIUM THIOSULFATE SOLUTION(57%)','ANTIOXIDANT JYANOX-626','BUTYL DIGLYCOL ACETATE','CRUDE GLYCERINE','CYCLOHEXANONE','ETHYLENE UREA(E-215)','EXPANDED PERLITE','FUMED SILICA','GMS (Glycerol MonoStearate )','HEPTANOIC ACID','IPAC(ISOPROPYL ACETATE)','ISOPROPYL ACETATE','ISOPROPYL ALCOHOL','JYANOX-626','METHACRYLIC ACID','MIXED FATTY ACID','Monochloroacetic Acid','NBR LATEX-DJ301','NBR LATEX-QD101','NBR LATEX-QN03','PALM FATTY ACID','PEG-200','SILICA SOL HSD-10050','STEARIC ACID','STEARIC ACID 1838','Vanadium pentoxide powder99.6%','VEGETABLE PITCH','WATER BASED PU'],
+  packing:['IN FLEXIBAG','IN DRUM','IN IBC','IN ISOTANK','IN BAG'],
+  origin:['CHINA','SOUTH KOREA','MALAYSIA','INDONESIA'],
+  pricePort:['BUSAN','INCHEON','QINGDAO','SHANGHAI'],
+  priceCountry:['SOUTH KOREA','CHINA','JAPAN','USA'],
+  qtyUnit:['','MT','KGS','KG','CBM','PCS','SET','FLEXIBAG'],
+  upUnit:['','USD/MT','USD/KG','USD/PCS'],
+  amtUnit:['','USD','EUR','CNY'],
+  nwUnit:['','KGS','MT','KG'],
+  gwUnit:['','KGS','KG','MT'],
+  msUnit:['','CBM','CFT'],
+  writer:['EasyTech User']
+};
+
+function getL(){try{return JSON.parse(localStorage.getItem(LK))||DEF;}catch(e){return DEF;}}
+function saveL(l){localStorage.setItem(LK,JSON.stringify(l));}
+function mergeDefaults(){
+  var L=getL(),changed=false;
+  var strKeys=['qtyUnit','gwUnit','nwUnit','msUnit','upUnit','amtUnit','pol','dest','commodity','packing','origin','pricePort','priceCountry','writer'];
+  strKeys.forEach(function(k){
+    if(!DEF[k])return;
+    if(!L[k])L[k]=[];
+    DEF[k].forEach(function(v){if(L[k].indexOf(v)<0){L[k].push(v);changed=true;}});
+  });
+  if(L.commodity){L.commodity.sort(function(a,b){return a.toLowerCase().localeCompare(b.toLowerCase());});changed=true;}
+  var objKeys=['to','shipper','consignee','notify'];
+  objKeys.forEach(function(k){
+    if(!DEF[k])return;
+    if(!L[k])L[k]=[];
+    DEF[k].forEach(function(dv){
+      var found=null;
+      for(var j=0;j<L[k].length;j++){if(L[k][j].n===dv.n){found=L[k][j];break;}}
+      if(!found){L[k].push(dv);changed=true;}
+      else if(!found.a&&dv.a){found.a=dv.a;changed=true;}
+    });
+  });
+  if(changed)saveL(L);
+}
+function g(id){var e=document.getElementById(id);return e?e.value||'':'';}
+function s(id,v){var e=document.getElementById(id);if(e)e.value=v||'';}
+function el(id){return document.getElementById(id);}
+
+// ---- PL SYNC MAP: plId -> ciId ----
+// These are the fields that auto-sync from CI to PL
+var SYNC_MAP=[
+  ['pl-shipper','ci-shipper'],
+  ['pl-shipperAddr','ci-shipperAddr'],
+  ['pl-invNo','ci-invNo'],
+  ['pl-invDate','ci-invDate'],
+  ['pl-consignee','ci-consignee'],
+  ['pl-consigneeAddr','ci-consigneeAddr'],
+  ['pl-notify','ci-notify'],
+  ['pl-notifyAddr','ci-notifyAddr'],
+  ['pl-pol','ci-pol'],
+  ['pl-dest','ci-dest'],
+  ['pl-vessel','ci-vessel'],
+  ['pl-sailing','ci-sailing'],
+  ['pl-comm','ci-comm'],
+  ['pl-packing','ci-packing']
+];
+
+// PL 업체명 변경 시 → 아래 주소 자동 삭제
+function plNameChanged(inp, addrId){
+  inp.dataset.m='1'; inp.classList.add('edited');
+  var addrEl=el(addrId);
+  if(addrEl){addrEl.value='';addrEl.dataset.m='1';addrEl.classList.add('edited');}
+  sv();
+}
+
+// Mark PL field as manually edited (turn orange)
+function plManual(inp){
+  inp.dataset.m='1';
+  inp.classList.add('edited');
+  sv();
+}
+
+// Reset a PL sync field back to auto (green, re-sync)
+function plReset(id){
+  var e=el(id);
+  if(!e)return;
+  delete e.dataset.m;
+  e.classList.remove('edited');
+  // Re-sync from CI
+  var ciId='';
+  for(var i=0;i<SYNC_MAP.length;i++){
+    if(SYNC_MAP[i][0]===id){ciId=SYNC_MAP[i][1];break;}
+  }
+  if(ciId) s(id,g(ciId));
+  sv();
+}
+
+// 업체명·주소는 CI 변경 시 항상 강제 동기화 (req 9)
+var PL_ALWAYS_SYNC=['pl-shipper','pl-shipperAddr','pl-consignee','pl-consigneeAddr','pl-notify','pl-notifyAddr','pl-vessel','pl-sailing'];
+
+// Sync all PL auto fields from CI
+function syncPL(){
+  for(var i=0;i<SYNC_MAP.length;i++){
+    var plId=SYNC_MAP[i][0], ciId=SYNC_MAP[i][1];
+    var pe=el(plId);
+    if(!pe)continue;
+    var force=PL_ALWAYS_SYNC.indexOf(plId)>=0;
+    if(force || !pe.dataset.m || pe.value==='' || pe.value.trim()===''){
+      delete pe.dataset.m;
+      pe.classList.remove('edited');
+      if(plId==='pl-comm'){
+        var ciV=ciComms.length>0?ciComms[0].comm:'';
+        if(ciV) s(plId,ciV);
+      } else if(plId==='pl-packing'){
+        var pkV=ciComms.length>0?ciComms[0].packing:'';
+        if(pkV) s(plId,pkV);
+      } else {
+        s(plId,g(ciId));
+      }
+    }
+  }
+}
+
+// ---- NOTIFY PARTY ← CONSIGNEE 자동 연동 ----
+function syncNotify(){
+  var nSel=el('ci-notify'), nAddr=el('ci-notifyAddr');
+  if(nSel&&!nSel.dataset.m){
+    nSel.value=g('ci-consignee');
+    nSel.classList.remove('edited');
+  }
+  if(nAddr&&!nAddr.dataset.m){
+    nAddr.value=g('ci-consigneeAddr');
+    nAddr.classList.remove('edited');
+  }
+}
+// 사용자가 Notify 셀렉트를 직접 선택 → 해당 업체 주소로 채우고 수동 편집 표시
+function notifyManualSel(inp){
+  inp.dataset.m='1'; inp.classList.add('edited');
+  fillAddr('notify');
+  var na=el('ci-notifyAddr');
+  if(na){na.dataset.m='1';na.classList.add('edited');}
+  sv();
+}
+// 사용자가 Notify 주소를 직접 수정
+function notifyManualAddr(inp){
+  inp.dataset.m='1'; inp.classList.add('edited');
+  sv();
+}
+// ↺ 버튼: Consignee 값으로 초기화
+function notifyReset(){
+  var nSel=el('ci-notify'), nAddr=el('ci-notifyAddr');
+  if(nSel){delete nSel.dataset.m; nSel.classList.remove('edited');}
+  if(nAddr){delete nAddr.dataset.m; nAddr.classList.remove('edited');}
+  syncNotify(); sv();
+}
+
+// Called whenever CI changes — syncNotify 먼저 실행해야 pl-notify가 최신 ci-notify 값을 받음
+function ciChanged(){syncNotify();syncPL();sv();}
+
+function showTab(t){
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('on');});
+  document.querySelectorAll('.tab').forEach(function(b){b.classList.remove('on');});
+  el(t+'-panel').classList.add('on');
+  el('tab-'+t).classList.add('on');
+  if(t==='pl'){syncPL();plCalc();}
+  if(t==='ci'){ciCalc();}
+}
+
+function popSel(id,arr,isObj){
+  var e=el(id);if(!e)return;
+  var cur=e.value;
+  e.innerHTML=arr.map(function(x){
+    var v=isObj?x.n:x;
+    return '<option value="'+v+'">'+(v===''?'없음':v)+'</option>';
+  }).join('');
+  if(cur!==undefined){
+    for(var i=0;i<e.options.length;i++){
+      if(e.options[i].value===cur){e.value=cur;break;}
+    }
+  }
+}
+
+// ---- CUSTOM DROPDOWN (req 11) ----
+function initCDrop(inputEl, getOpts){
+  if(!inputEl)return;
+  var list=document.createElement('ul');
+  list.className='cdrop-list';
+  list.style.display='none';
+  document.body.appendChild(list);
+  function updatePos(){
+    var r=inputEl.getBoundingClientRect();
+    list.style.left=r.left+'px';
+    list.style.top=(r.bottom+2)+'px';
+    list.style.width=Math.max(r.width,160)+'px';
+  }
+  function show(filterByInput){
+    var items=getOpts();
+    var q=(filterByInput&&inputEl.value.trim().toUpperCase())||'';
+    var filtered=q?items.filter(function(x){return x.toUpperCase().indexOf(q)>=0;}):items;
+    if(!filtered.length){list.style.display='none';return;}
+    list.innerHTML=filtered.map(function(x){
+      var safe=x.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+      return '<li class="cdrop-item" data-val="'+safe+'">'+safe+'</li>';
+    }).join('');
+    updatePos();
+    list.style.display='block';
+  }
+  inputEl._cshow=function(){show(false);}; // ▼ 버튼: 항상 전체 목록
+  inputEl.addEventListener('focus',function(){show(false);}); // 포커스: 전체
+  inputEl.addEventListener('click',function(){show(false);}); // 클릭: 전체
+  inputEl.addEventListener('input',function(){show(true);});  // 타이핑: 필터
+  list.addEventListener('mousedown',function(e){
+    var li=e.target;
+    while(li&&li!==list&&!(li.className&&li.className.indexOf('cdrop-item')>=0))li=li.parentNode;
+    if(!li||!li.getAttribute||!li.getAttribute('data-val'))return;
+    e.preventDefault();
+    inputEl.value=li.getAttribute('data-val');
+    list.style.display='none';
+    inputEl.dispatchEvent(new Event('change',{bubbles:true}));
+  });
+  inputEl.addEventListener('blur',function(){setTimeout(function(){list.style.display='none';},150);});
+  window.addEventListener('resize',function(){if(list.style.display!=='none')updatePos();});
+  window.addEventListener('scroll',function(){if(list.style.display!=='none')updatePos();},true);
+  return list;
+}
+function showDrop(inputId){var inp=el(inputId);if(inp&&inp._cshow){inp.focus();inp._cshow();}}
+function initDropdowns(){
+  initCDrop(el('ci-to'),function(){return (getL().to||[]).map(function(x){return x.n;});});
+  initCDrop(el('ci-shipper'),function(){return (getL().shipper||[]).map(function(x){return x.n;});});
+  initCDrop(el('ci-consignee'),function(){return (getL().consignee||[]).map(function(x){return x.n;});});
+  initCDrop(el('ci-notify'),function(){return (getL().notify||[]).map(function(x){return x.n;});});
+  initCDrop(el('pl-shipper'),function(){return (getL().shipper||[]).map(function(x){return x.n;});});
+  initCDrop(el('pl-consignee'),function(){return (getL().consignee||[]).map(function(x){return x.n;});});
+  initCDrop(el('pl-notify'),function(){return (getL().notify||[]).map(function(x){return x.n;});});
+  initCDrop(el('pl-comm'),function(){return getL().commodity||[];});
+}
+
+// PL 독립 사용 시 업체명 선택 → 주소 자동 채우기 (req 12)
+function plOnSel(type){
+  var L=getL();
+  var sMap={shipper:'pl-shipper',consignee:'pl-consignee',notify:'pl-notify'};
+  var aMap={shipper:'pl-shipperAddr',consignee:'pl-consigneeAddr',notify:'pl-notifyAddr'};
+  var nameEl=el(sMap[type]);
+  if(!nameEl)return;
+  nameEl.dataset.m='1'; nameEl.classList.add('edited');
+  var addrId=aMap[type];
+  if(addrId){
+    var name=nameEl.value;
+    var arr=L[type]||[];
+    var found=null;
+    for(var i=0;i<arr.length;i++){if(arr[i].n===name){found=arr[i];break;}}
+    var addrEl=el(addrId);
+    if(addrEl){addrEl.value=found?(found.a||''):'';addrEl.dataset.m='1';addrEl.classList.add('edited');}
+  }
+  sv();
+}
+
+// datalist 옵션 채우기 (input + datalist 자동완성용)
+function popDL(inputId, arr, isObj){
+  var dl=el('dl-'+inputId);if(!dl)return;
+  dl.innerHTML=arr.map(function(x){
+    var v=isObj?x.n:x;
+    return '<option value="'+v+'">';
+  }).join('');
+}
+
+function loadSels(){
+  mergeDefaults();
+  var L=getL();
+  popSel('ci-pol',L.pol,false);popSel('ci-dest',L.dest,false);
+  popSel('ci-pp',L.pricePort,false);
+  popSel('ci-pc',L.priceCountry,false);popSel('ci-qtyUnit',L.qtyUnit,false);
+  popSel('ci-cur',L.amtUnit,false);
+  popSel('pl-qtyUnit',L.qtyUnit,false);popSel('writer',L.writer,false);
+  popSel('pl-gwUnit',L.gwUnit,false);
+}
+
+function fillAddr(type){
+  var L=getL();
+  var sMap={to:'ci-to',shipper:'ci-shipper',consignee:'ci-consignee',notify:'ci-notify'};
+  var aMap={shipper:'ci-shipperAddr',consignee:'ci-consigneeAddr',notify:'ci-notifyAddr'};
+  var name=g(sMap[type]);
+  var found=null;
+  var arr=L[type]||[];
+  for(var i=0;i<arr.length;i++){if(arr[i].n===name){found=arr[i];break;}}
+  var addrId=aMap[type];
+  // 업체명에 해당하는 주소가 없으면 자동 삭제
+  if(addrId){s(addrId, found ? (found.a||'') : '');}
+}
+
+function onSel(type){
+  if(type==='consignee'){s('ci-to',g('ci-consignee'));}
+  else if(type==='to'){s('ci-consignee',g('ci-to'));fillAddr('consignee');}
+  fillAddr(type);
+  ciChanged();
+}
+
+function fillAllAddrs(){
+  var types=['shipper','consignee','notify'];
+  for(var t=0;t<types.length;t++){
+    var type=types[t];
+    var L=getL();
+    var sMap={shipper:'ci-shipper',consignee:'ci-consignee',notify:'ci-notify'};
+    var aMap={shipper:'ci-shipperAddr',consignee:'ci-consigneeAddr',notify:'ci-notifyAddr'};
+    var name=g(sMap[type]);
+    if(!name)continue;
+    var arr=L[type]||[];
+    var found=null;
+    for(var i=0;i<arr.length;i++){if(arr[i].n===name){found=arr[i];break;}}
+    if(found&&aMap[type]&&!g(aMap[type])){s(aMap[type],found.a||'');}
+  }
+}
+
+function openDP(fid){
+  var dp=el('dp'+fid);
+  if(!dp)return;
+  dp.style.display='block';
+  dp.focus();
+  dp.click();
+}
+
+function applyDP(fid){
+  var dp=el('dp'+fid);
+  if(!dp||!dp.value)return;
+  var d=new Date(dp.value+'T00:00:00');
+  var mn=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  s(fid,mn[d.getMonth()]+'. '+d.getDate()+', '+d.getFullYear());
+  dp.style.display='none';
+  ciChanged();
+}
+
+function ciCalc(){
+  if(ciComms.length>0){ciCalcMulti();return;}
+  var qty=parseFloat(g('ci-qty'))||0;
+  var up=parseFloat(g('ci-up'))||0;
+  var amt=qty*up;
+  var cur=g('ci-cur'), unit=g('ci-qtyUnit');
+  var uDisp=(unit===''||unit==='없음')?'':unit;
+  var upUnit=g('ci-upUnit');var upParts=upUnit.split('/');var upCur=upParts[0]||'';var upUnitPart=upParts.length>1?upParts[1]:'';
+  function f2(n){return n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}
+  var qsEl=el('ci-qtyShow');
+  if(qsEl&&!qsEl.dataset.m){qsEl.value=qty>0?(String(qty)+uDisp):'';}
+  el('ci-amt').textContent=amt>0?f2(amt):'';
+  var c35=g('ci-qtyShow');
+  el('ci-tq').textContent=c35?c35:'';
+  el('ci-tu').textContent=up>0?upCur+f2(up)+(upUnitPart?'/'+upUnitPart:''):'';
+  el('ci-ta').textContent=amt>0?(cur?cur+' ':'')+f2(amt):'';
+  sv();
+}
+
+var cts=[];
+function addCt(d){cts.push(d||{no:'',nw:'',gw:'',ms:'',ctqty:'1'});renderCts();plCalc();sv();}
+function delCt(i){cts.splice(i,1);renderCts();plCalc();sv();}
+function renderCts(){
+  var tb=el('ctBody');tb.innerHTML='';
+  cts.forEach(function(c,i){
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td style="border-left:1px solid #888;border-right:1px solid #888;border-top:none;border-bottom:none;background:white;"></td>'+
+      '<td style="padding:2px 4px;border-left:1px solid #888;"><div class="r2">'+
+      '<input class="f" data-i="'+i+'" data-k="no" value="'+(c.no||'')+'" placeholder="CONTAINER NO./SEAL NO." style="text-transform:none;">'+
+      '<button class="abtn" style="background:#c0392b;" onclick="delCt('+i+')">x</button></div></td>'+
+      '<td style="text-align:right;padding:2px 4px;vertical-align:middle;"><input class="f" type="number" data-i="'+i+'" data-k="ctqty" value="'+(c.ctqty||'1')+'" style="text-align:right;width:36px;"></td>'+
+      '<td style="text-align:center;padding:2px 4px;"><input class="f" type="number" data-i="'+i+'" data-k="nw" value="'+(c.nw||'')+'" placeholder="0" style="text-align:center;width:80px;"></td>'+
+      '<td style="text-align:center;padding:2px 4px;"><input class="f" type="number" data-i="'+i+'" data-k="gw" value="'+(c.gw||'')+'" placeholder="0" style="text-align:center;width:80px;"></td>'+
+      '<td style="text-align:center;padding:2px 4px;"><input class="f" type="number" data-i="'+i+'" data-k="ms" value="'+(c.ms?parseFloat(c.ms)||'':'')+'" placeholder="0" style="text-align:center;width:80px;"></td>';
+    tb.appendChild(tr);
+  });
+  tb.querySelectorAll('input').forEach(function(inp){
+    inp.addEventListener('input',function(){cts[+this.dataset.i][this.dataset.k]=this.value;plCalc();sv();});
+  });
+}
+
+function plCalc(){
+  var nwU=g('pl-nwUnit'),msU=g('pl-msUnit');
+  var tNW=0,tGW=0,tMS=0,tQTY=0;
+  cts.forEach(function(c){tNW+=parseFloat(c.nw)||0;tGW+=parseFloat(c.gw)||0;tMS+=parseFloat(c.ms)||0;tQTY+=parseFloat(c.ctqty)||0;});
+  var qsEl=el('pl-qtyShow');
+  if(qsEl&&!qsEl.dataset.m)qsEl.value=tNW>0?tNW.toLocaleString()+nwU:'';
+  var tqEl=el('pl-tq'),tnEl=el('pl-tn'),tgEl=el('pl-tg'),tmEl=el('pl-tm');
+  if(tqEl&&!tqEl.dataset.m){var qU=g('pl-qtyUnit');tqEl.value=tQTY>0?tQTY+(qU&&qU!=='없음'?' '+qU:''):'';};
+  if(tnEl&&!tnEl.dataset.m)tnEl.value=tNW>0?tNW.toLocaleString()+' '+nwU:'';
+  if(tgEl&&!tgEl.dataset.m)tgEl.value=tGW>0?tGW.toLocaleString()+' '+g('pl-gwUnit'):'';
+  if(tmEl&&!tmEl.dataset.m)tmEl.value=tMS>0?tMS+msU:'';
+  sv();
+}
+
+// ---- SAVE / LOAD ----
+var CI_F=['ci-to','ci-shipper','ci-shipperAddr','ci-consignee','ci-consigneeAddr',
+  'ci-notify','ci-notifyAddr','ci-invNo','ci-invDate','ci-lcNo','ci-lcDate',
+  'ci-contractNo','ci-contractDate','ci-remark','ci-pol','ci-dest',
+  'ci-vessel','ci-sailing','ci-qtyUnit',
+  'ci-upUnit','ci-cur','ci-pt','ci-pp','ci-pc','ci-nm'];
+var PL_F=['pl-remark','pl-nm','pl-qtyUnit','pl-nwUnit','pl-gwUnit','pl-msUnit',
+  'pl-qtyShow','pl-tq','pl-tn','pl-tg','pl-tm','writer'];
+// PL sync fields saved separately with manual flags
+var PL_S=['pl-shipper','pl-shipperAddr','pl-invNo','pl-invDate',
+  'pl-consignee','pl-consigneeAddr','pl-notify','pl-notifyAddr',
+  'pl-pol','pl-dest','pl-vessel','pl-sailing','pl-comm','pl-packing'];
+
+function noneApply(key,isNone,focus){
+  var cfg={
+    inv:{no:'ci-invNo',dt:'ci-invDate',btn:'ci-invNoneBtn',wrap:'ci-inv-content'},
+    lc:{no:'ci-lcNo',dt:'ci-lcDate',btn:'ci-lcNoneBtn',wrap:'ci-lc-content'},
+    contract:{no:'ci-contractNo',dt:'ci-contractDate',btn:'ci-contractNoneBtn',wrap:'ci-contract-content'}
+  };
+  var c=cfg[key];if(!c)return;
+  var noEl=el(c.no),dtEl=el(c.dt),btn=el(c.btn),wrap=el(c.wrap);
+  if(isNone){
+    if(noEl){noEl.value='';noEl.disabled=true;noEl.dataset.none='1';}
+    if(dtEl){dtEl.value='';dtEl.disabled=true;}
+    if(wrap)wrap.style.visibility='hidden';
+    if(btn){btn.textContent='직접입력';btn.style.background='#c0392b';}
+  }else{
+    if(noEl){noEl.disabled=false;delete noEl.dataset.none;}
+    if(dtEl)dtEl.disabled=false;
+    if(wrap)wrap.style.visibility='';
+    if(btn){btn.textContent='없음';btn.style.background='#888';}
+    if(focus&&noEl)setTimeout(function(){noEl.focus();},50);
+  }
+}
+function noneToggle(key){
+  var ids={inv:'ci-invNo',lc:'ci-lcNo',contract:'ci-contractNo'};
+  var noEl=el(ids[key]);if(!noEl)return;
+  noneApply(key,noEl.dataset.none!=='1',true);sv();
+}
+var _NONE_SECTIONS=[
+  {no:'ci-invNo',dt:'ci-invDate',wrap:'ci-inv-content'},
+  {no:'ci-lcNo',dt:'ci-lcDate',wrap:'ci-lc-content'},
+  {no:'ci-contractNo',dt:'ci-contractDate',wrap:'ci-contract-content'}
+];
+window.addEventListener('beforeprint',function(){
+  _NONE_SECTIONS.forEach(function(c){
+    var noEl=el(c.no),dtEl=el(c.dt),wrap=el(c.wrap);
+    if(!wrap||!noEl)return;
+    if(noEl.dataset.none==='1'||(!noEl.value.trim()&&(!dtEl||!dtEl.value.trim()))){
+      wrap.dataset.phide='1';
+    }
+  });
+});
+window.addEventListener('afterprint',function(){
+  document.querySelectorAll('[data-phide]').forEach(function(e){delete e.dataset.phide;});
+});
+function sv(){
+  var d={};
+  CI_F.forEach(function(id){d[id]=g(id);});
+  ['inv','lc','contract'].forEach(function(k){var ids={inv:'ci-invNo',lc:'ci-lcNo',contract:'ci-contractNo'};var e=el(ids[k]);if(e&&e.dataset.none==='1')d[k+'None']='1';});
+  PL_F.forEach(function(id){d[id]=g(id);});
+  PL_S.forEach(function(id){
+    d[id]=g(id);
+    var e=el(id);
+    if(e&&e.dataset.m)d['m_'+id]='1';
+  });
+  // ci-notify 수동 편집 플래그 저장
+  ['ci-notify','ci-notifyAddr'].forEach(function(id){
+    var e=el(id);if(e&&e.dataset.m)d['m_'+id]='1';
+  });
+  d._cts=JSON.stringify(cts);
+  d._ciComms=JSON.stringify(ciComms);
+  d._plExtraComms=JSON.stringify(plExtraComms);
+  try{localStorage.setItem(SK,JSON.stringify(d));}catch(e){}
+}
+
+function ld(){
+  try{
+    var raw=localStorage.getItem(SK);if(!raw)return false;
+    var d=JSON.parse(raw);
+    var has=false;
+    CI_F.forEach(function(id){if(d[id]!==undefined&&d[id]!==''){s(id,d[id]);has=true;}});
+    PL_F.forEach(function(id){if(d[id]!==undefined&&d[id]!=='')s(id,d[id]);});
+    PL_S.forEach(function(id){
+      if(d[id]!==undefined&&d[id]!=='')s(id,d[id]);
+      if(d['m_'+id]){
+        var e=el(id);
+        if(e){e.dataset.m='1';e.classList.add('edited');}
+      }
+    });
+    // ci-notify 수동 편집 플래그 복원
+    ['ci-notify','ci-notifyAddr'].forEach(function(id){
+      if(d['m_'+id]){var e=el(id);if(e){e.dataset.m='1';e.classList.add('edited');}}
+    });
+    ['inv','lc','contract'].forEach(function(k){if(d[k+'None']==='1')noneApply(k,true);});
+    if(d._cts){cts=JSON.parse(d._cts)||[];renderCts();}
+    if(d._ciComms&&JSON.parse(d._ciComms).length>0){ciComms=JSON.parse(d._ciComms)||[];}
+    if(d._plExtraComms){plExtraComms=JSON.parse(d._plExtraComms)||[];}
+    return has;
+  }catch(e){return false;}
+}
+
+function doReset(){
+  if(!confirm('Reset all data?'))return;
+  localStorage.removeItem(SK);localStorage.removeItem(LK);location.reload();
+}
+
+document.addEventListener('change',function(e){if(e.target.classList.contains('f'))sv();});
+document.addEventListener('input',function(e){if(e.target.classList.contains('f'))sv();});
+// fs 클래스 필드(자동연동)에 커서 진입 즉시 수동 편집 상태로 전환
+// → syncNotify / syncPL 이 덮어쓰는 것을 방지 (CI notify, PL 전체 적용)
+document.addEventListener('focusin',function(e){
+  var t=e.target;
+  if((t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT')
+      &&t.classList.contains('fs')&&!t.dataset.m){
+    t.dataset.m='1'; t.classList.add('edited');
+  }
+});
+
+// ---- EXCEL with ExcelJS ----
+function doExcel(){
+  if(typeof ExcelJS==='undefined'){alert('ExcelJS loading... please wait.');return;}
+  var isCi=el('ci-panel').classList.contains('on');
+  var comm=isCi?(ciComms.length>0?ciComms[0].comm:'ITEM'):(g('pl-comm')||'ITEM');
+  var fname=(isCi?'CI':'PL')+'_'+comm+'_'+(g(isCi?'ci-invNo':'pl-invNo')||'NO')+'_'+(g(isCi?'ci-invDate':'pl-invDate')||'DATE')+'.xlsx';
+  var wb=new ExcelJS.Workbook();
+  if(isCi){buildCIsheet(wb);}else{buildPLsheet(wb);}
+  wb.xlsx.writeBuffer().then(function(buf){
+    var blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');a.href=url;a.download=fname;
+    document.body.appendChild(a);a.click();
+    setTimeout(function(){URL.revokeObjectURL(url);document.body.removeChild(a);},200);
+  }).catch(function(e){alert('Excel error: '+e.message);});
+}
+
+function mkSt(sz,bold,al,bd){
+  var R='FF000000', thin={style:'thin',color:{argb:R}}, med={style:'medium',color:{argb:R}};
+  var b={};
+  if(bd){
+    if(bd.t)b.top=thin;if(bd.b)b.bottom=thin;
+    if(bd.l)b.left=thin;if(bd.r)b.right=thin;
+    if(bd.T)b.top=med;if(bd.B)b.bottom=med;
+    if(bd.D)b.bottom={style:'double',color:{argb:R}};
+    if(bd.DT)b.top={style:'double',color:{argb:R}};
+  }
+  return{font:{name:'Times New Roman',size:sz||9,bold:!!bold,color:{argb:R}},
+    alignment:{horizontal:al||'left',vertical:'middle',wrapText:true},
+    fill:{type:'pattern',pattern:'none'},border:b};
+}
+function sc(ws,r,c,v,st){var cell=ws.getCell(r,c);cell.value=v;if(st)cell.style=st;}
+function mr(ws,r1,c1,r2,c2){ws.mergeCells(r1,c1,r2,c2);}
+function f2(n){return(parseFloat(n)||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}
+
+function buildCIsheet(wb){
+  var ws=wb.addWorksheet('CI format');
+  ws.getColumn(1).width=18.1;ws.getColumn(2).width=8;ws.getColumn(3).width=16.1;
+  ws.getColumn(4).width=11.4;ws.getColumn(5).width=2.9;ws.getColumn(6).width=11.3;ws.getColumn(7).width=11.1;
+  var _c=ciComms.length>0?ciComms[0]:{};var qty=parseFloat(_c.qty)||0,up=parseFloat(_c.up)||0,amt=qty*up;
+  var cur=g('ci-cur'),unit=g('ci-qtyUnit'),c35=_c.qtyShow||'';
+  var _upUnit=g('ci-upUnit');var _upParts=_upUnit.split('/');var _upCur=_upParts[0]||'';var _upUnitPart=_upParts.length>1?_upParts[1]:'';
+  var r=1;
+  ws.getRow(r).height=20;
+  sc(ws,r,1,'COMMERCIAL INVOICE',{font:{name:'Times New Roman',size:16,bold:true},alignment:{horizontal:'center',vertical:'middle'},fill:{type:'pattern',pattern:'none'},border:{}});
+  mr(ws,r,1,r,6);
+  sc(ws,r,7,'ORIGINAL',mkSt(9,true,'center',{t:1,b:1,l:1,r:1}));r++;
+
+  ws.getRow(r).height=16;
+  sc(ws,r,1,'TO: '+g('ci-to'),{font:{name:'Times New Roman',size:10,bold:true},alignment:{horizontal:'left',vertical:'middle'},fill:{type:'pattern',pattern:'none'},border:{}});
+  mr(ws,r,1,r,7);r++;
+
+  ws.getRow(r).height=14;
+  sc(ws,r,1,'1.Shipper/Exporter:',mkSt(9,true,'left',{t:1,l:1,r:1}));mr(ws,r,1,r,3);
+  sc(ws,r,4,'8.No. & Date of invoice',mkSt(9,true,'left',{t:1,l:1,r:1}));mr(ws,r,4,r,7);r++;
+
+  ws.getRow(r).height=14;
+  sc(ws,r,1,g('ci-shipper'),mkSt(9,false,'left',{l:1,r:1}));mr(ws,r,1,r,3);
+  sc(ws,r,4,g('ci-invNo'),mkSt(9,false,'left',{b:1,l:1}));mr(ws,r,4,r,6);
+  sc(ws,r,7,g('ci-invDate'),mkSt(9,false,'left',{b:1,r:1}));r++;
+
+  ws.getRow(r).height=14;
+  sc(ws,r,1,(g('ci-shipperAddr')||'').replace(/\n/g,' '),mkSt(9,false,'left',{l:1,r:1}));mr(ws,r,1,r,3);
+  sc(ws,r,4,'9.No. & Date of L/C:',mkSt(9,true,'left',{t:1,l:1}));mr(ws,r,4,r,7);r++;
+
+  ws.getRow(r).height=14;
+  sc(ws,r,1,'',mkSt(9,false,'left',{l:1,r:1}));mr(ws,r,1,r,3);
+  sc(ws,r,4,g('ci-lcNo'),mkSt(9,false,'left',{b:1,l:1}));mr(ws,r,4,r,6);
+  sc(ws,r,7,g('ci-lcDate'),mkSt(9,false,'left',{b:1,r:1}));r++;
+
+  ws.getRow(r).height=14;
+  sc(ws,r,1,'',mkSt(9,false,'left',{b:1,l:1,r:1}));mr(ws,r,1,r,3);
+  sc(ws,r,4,'10.No. & Date of Contract:',mkSt(9,true,'left',{t:1,l:1}));mr(ws,r,4,r,7);r++;
+
+  ws.getRow(r).height=14;
+  sc(ws,r,1,'2. Consignee:',mkSt(9,true,'left',{t:1,l:1,r:1}));mr(ws,r,1,r,3);
+  sc(ws,r,4,g('ci-contractNo'),mkSt(9,false,'left',{b:1,l:1}));mr(ws,r,4,r,6);
+  sc(ws,r,7,g('ci-contractDate'),mkSt(9,false,'left',{b:1,r:1}));r++;
+
+  ws.getRow(r).height=14;
+  sc(ws,r,1,g('ci-consignee'),mkSt(9,false,'left',{l:1,r:1}));mr(ws,r,1,r,3);
+  sc(ws,r,4,'11.Remark',mkSt(9,false,'left',{t:1,l:1,r:1}));mr(ws,r,4,r,7);r++;
+
+  ws.getRow(r).height=14;
+  sc(ws,r,1,(g('ci-consigneeAddr')||'').replace(/\n/g,' '),mkSt(9,false,'left',{l:1,r:1}));mr(ws,r,1,r,3);
+  sc(ws,r,4,g('ci-remark'),mkSt(9,false,'left',{l:1,r:1}));mr(ws,r,4,r+2,4,7);r++;
+  ws.getRow(r).height=14;sc(ws,r,1,'',mkSt(9,false,'left',{l:1,r:1}));mr(ws,r,1,r,3);r++;
+  ws.getRow(r).height=14;sc(ws,r,1,'',mkSt(9,false,'left',{b:1,l:1,r:1}));mr(ws,r,1,r,3);r++;
+
+  ws.getRow(r).height=14;sc(ws,r,1,'3.Notify Party:',mkSt(9,true,'left',{t:1,l:1,r:1}));mr(ws,r,1,r,3);r++;
+  ws.getRow(r).height=14;sc(ws,r,1,g('ci-notify'),mkSt(9,false,'left',{l:1,r:1}));mr(ws,r,1,r,3);r++;
+  ws.getRow(r).height=14;sc(ws,r,1,(g('ci-notifyAddr')||'').replace(/\n/g,' '),mkSt(9,false,'left',{l:1,r:1}));mr(ws,r,1,r,3);r++;
+  ws.getRow(r).height=14;sc(ws,r,1,'',mkSt(9,false,'left',{b:1,l:1,r:1}));mr(ws,r,1,r,3);r++;
+
+  ws.getRow(r).height=15;
+  sc(ws,r,1,'4.Port of Loading',mkSt(9,true,'left',{t:1,l:1,r:1}));
+  sc(ws,r,2,'5. Final Destination',mkSt(9,true,'left',{t:1,l:1,r:1}));mr(ws,r,2,r,7);r++;
+  ws.getRow(r).height=15;
+  sc(ws,r,1,g('ci-pol'),mkSt(9,false,'left',{b:1,l:1,r:1}));
+  sc(ws,r,2,g('ci-dest'),mkSt(9,false,'left',{b:1,l:1,r:1}));mr(ws,r,2,r,7);r++;
+
+  ws.getRow(r).height=13;
+  sc(ws,r,1,'6.Vessel/Voy. No.',mkSt(9,true,'left',{t:1,l:1,r:1}));
+  sc(ws,r,2,'7.Sailing on or About',mkSt(9,true,'left',{t:1,l:1,r:1}));mr(ws,r,2,r,7);r++;
+  ws.getRow(r).height=13;
+  sc(ws,r,1,g('ci-vessel'),mkSt(9,false,'left',{b:1,l:1,r:1}));
+  sc(ws,r,2,g('ci-sailing'),mkSt(9,false,'left',{b:1,l:1,r:1}));mr(ws,r,2,r,7);r++;
+
+  ws.getRow(r).height=16;
+  sc(ws,r,1,'12.Marks and\nNumber of PKGS',mkSt(8,true,'left',{t:1,b:1,l:1,r:1}));
+  sc(ws,r,2,'13.Description of Goods',mkSt(8,true,'left',{t:1,b:1,l:1,r:1}));mr(ws,r,2,r,3);
+  sc(ws,r,4,'14.Quantity\n'+unit,mkSt(8,true,'left',{t:1,b:1,l:1,r:1}));mr(ws,r,4,r,5);
+  sc(ws,r,6,'15.Unit Price\n'+g('ci-upUnit'),mkSt(8,true,'left',{t:1,b:1,l:1,r:1}));
+  sc(ws,r,7,'16.Amount\n'+cur,mkSt(8,true,'left',{t:1,b:1,l:1,r:1}));r++;
+
+  var nmRow=r;
+  ws.getRow(r).height=12;
+  sc(ws,r,1,'N/M',mkSt(9,true,'center',{D:1}));
+  sc(ws,r,4,unit,mkSt(9,true,'center',{t:1}));mr(ws,r,4,r,5);
+  sc(ws,r,6,g('ci-upUnit'),mkSt(9,true,'center',{}));
+  sc(ws,r,7,cur,mkSt(9,true,'center',{}));r++;
+
+  ws.getRow(r).height=8;r++;
+
+  ws.getRow(r).height=11;
+  sc(ws,r,4,'PRICE TERMS:',mkSt(9,true,'center',{}));mr(ws,r,4,r,5);
+  sc(ws,r,6,g('ci-pt')+' '+g('ci-pp')+' PORT, '+g('ci-pc'),mkSt(9,true,'left',{}));mr(ws,r,6,r,7);r++;
+
+  ws.getRow(r).height=15;
+  sc(ws,r,2,'COMMODITY: ',mkSt(9,true,'left',{}));sc(ws,r,3,(ciComms.length>0?ciComms[0].comm:''),mkSt(9,true,'left',{}));
+  sc(ws,r,4,qty>0?qty:'',mkSt(9,false,'center',{}));mr(ws,r,4,r,5);
+  sc(ws,r,6,up>0?up:'',mkSt(9,false,'center',{}));sc(ws,r,7,amt>0?amt:'',mkSt(9,false,'center',{}));r++;
+
+  ws.getRow(r).height=15;sc(ws,r,2,'QUANTITY:',mkSt(9,true,'left',{}));sc(ws,r,3,c35,mkSt(9,false,'left',{}));mr(ws,r,3,r,7);r++;
+  ws.getRow(r).height=15;sc(ws,r,2,'PACKING:',mkSt(9,true,'left',{}));sc(ws,r,3,(ciComms.length>0?ciComms[0].packing:''),mkSt(9,false,'left',{}));mr(ws,r,3,r,7);r++;
+  ws.getRow(r).height=15;sc(ws,r,2,'COUNTRY OF ORIGIN: ',mkSt(9,true,'left',{}));sc(ws,r,3,(ciComms.length>0?ciComms[0].origin:''),mkSt(9,false,'left',{}));mr(ws,r,3,r,7);r++;
+
+  for(var i=0;i<5;i++){ws.getRow(r).height=14;r++;}
+  mr(ws,nmRow,1,r-1,1);
+
+  ws.getRow(r).height=22;
+  sc(ws,r,3,'TOTAL',mkSt(9,true,'center',{}));
+  sc(ws,r,4,c35?c35+unit:'',mkSt(9,true,'center',{DT:1}));mr(ws,r,4,r,5);
+  sc(ws,r,6,up>0?_upCur+f2(up)+(_upUnitPart?'/'+_upUnitPart:''):'',mkSt(9,true,'center',{}));
+  sc(ws,r,7,amt>0?(cur?cur+' ':'')+f2(amt):'',mkSt(9,true,'center',{}));r++;
+
+  for(var i=0;i<3;i++){ws.getRow(r).height=13;r++;}
+  ws.getRow(r).height=16;
+  var sc2=ws.getCell(r,6);sc2.value='Signed by';
+  sc2.style={font:{name:'Times New Roman',size:12,bold:true},alignment:{horizontal:'left',vertical:'middle'},fill:{type:'pattern',pattern:'none'},border:{bottom:{style:'medium',color:{argb:'FF000000'}}}};
+  mr(ws,r,6,r,7);
+}
+
+function buildPLsheet(wb){
+  var ws=wb.addWorksheet('PL format');
+  ws.getColumn(1).width=20.5;ws.getColumn(2).width=20.8;ws.getColumn(3).width=8.6;
+  ws.getColumn(4).width=8;ws.getColumn(5).width=9.3;ws.getColumn(6).width=13.3;ws.getColumn(7).width=12;
+  var r=1;
+  ws.getRow(r).height=20;
+  sc(ws,r,1,'PACKING LIST',{font:{name:'Times New Roman',size:16,bold:true},alignment:{horizontal:'center',vertical:'middle'},fill:{type:'pattern',pattern:'none'},border:{}});
+  mr(ws,r,1,r,7);r++;
+
+  ws.getRow(r).height=14;sc(ws,r,1,'1.Shipper/Exporter:',mkSt(9,true,'left',{t:1,l:1,r:1}));mr(ws,r,1,r,3);
+  sc(ws,r,4,'8.No. & Date of invoice',mkSt(9,true,'left',{t:1,l:1,r:1}));mr(ws,r,4,r,7);r++;
+  ws.getRow(r).height=13;sc(ws,r,1,g('pl-shipper'),mkSt(9,false,'left',{l:1,r:1}));mr(ws,r,1,r,3);
+  sc(ws,r,4,g('pl-invNo'),mkSt(9,false,'left',{l:1}));mr(ws,r,4,r,6);sc(ws,r,7,g('pl-invDate'),mkSt(9,false,'left',{r:1}));r++;
+  ws.getRow(r).height=13;sc(ws,r,1,(g('pl-shipperAddr')||'').replace(/\n/g,' '),mkSt(9,false,'left',{l:1,r:1}));mr(ws,r,1,r,3);
+  sc(ws,r,4,'9.Remarks',mkSt(9,true,'left',{t:1,l:1,r:1}));mr(ws,r,4,r,7);r++;
+  ws.getRow(r).height=13;sc(ws,r,1,'',mkSt(9,false,'left',{b:1,l:1,r:1}));mr(ws,r,1,r,3);
+  sc(ws,r,4,g('pl-remark'),mkSt(9,false,'left',{l:1,r:1}));mr(ws,r,4,r+8,4,7);r++;
+  ws.getRow(r).height=13;sc(ws,r,1,'2. Consignee:',mkSt(9,true,'left',{t:1,l:1,r:1}));mr(ws,r,1,r,3);r++;
+  ws.getRow(r).height=13;sc(ws,r,1,g('pl-consignee'),mkSt(9,false,'left',{l:1,r:1}));mr(ws,r,1,r,3);r++;
+  ws.getRow(r).height=13;sc(ws,r,1,(g('pl-consigneeAddr')||'').replace(/\n/g,' '),mkSt(9,false,'left',{l:1,r:1}));mr(ws,r,1,r,3);r++;
+  ws.getRow(r).height=13;sc(ws,r,1,'',mkSt(9,false,'left',{b:1,l:1,r:1}));mr(ws,r,1,r,3);r++;
+  ws.getRow(r).height=13;sc(ws,r,1,'3.Notify Party:',mkSt(9,true,'left',{l:1,r:1}));mr(ws,r,1,r,3);r++;
+  ws.getRow(r).height=13;sc(ws,r,1,g('pl-notify'),mkSt(9,false,'left',{l:1,r:1}));mr(ws,r,1,r,3);r++;
+  ws.getRow(r).height=13;sc(ws,r,1,(g('pl-notifyAddr')||'').replace(/\n/g,' '),mkSt(9,false,'left',{l:1,r:1}));mr(ws,r,1,r,3);r++;
+  ws.getRow(r).height=13;sc(ws,r,1,'',mkSt(9,false,'left',{b:1,l:1,r:1}));mr(ws,r,1,r,3);r++;
+  ws.getRow(r).height=13;r++;
+  ws.getRow(r).height=15;sc(ws,r,1,'4.Port of Loading',mkSt(9,true,'left',{t:1,l:1,r:1}));
+  sc(ws,r,2,'5. Final Destination',mkSt(9,true,'left',{t:1,l:1,r:1}));mr(ws,r,2,r,7);r++;
+  ws.getRow(r).height=15;sc(ws,r,1,g('pl-pol'),mkSt(9,false,'left',{b:1,l:1,r:1}));
+  sc(ws,r,2,g('pl-dest'),mkSt(9,false,'left',{b:1,l:1,r:1}));mr(ws,r,2,r,7);r++;
+  ws.getRow(r).height=13;sc(ws,r,1,'6.Vessel/Voy. No.',mkSt(9,true,'left',{l:1,r:1}));
+  sc(ws,r,2,'7.Sailing on or About',mkSt(9,true,'left',{l:1,r:1}));mr(ws,r,2,r,7);r++;
+  ws.getRow(r).height=13;sc(ws,r,1,g('pl-vessel'),mkSt(9,false,'left',{l:1,r:1}));
+  sc(ws,r,2,g('pl-sailing'),mkSt(9,false,'left',{b:1,l:1,r:1}));mr(ws,r,2,r,7);r++;
+
+  ws.getRow(r).height=20;
+  sc(ws,r,1,'10.Marks and\nNumber of PKGS',mkSt(8,true,'left',{t:1,b:1,l:1,r:1}));
+  sc(ws,r,2,'11.Description of Goods',mkSt(8,true,'left',{t:1,b:1,l:1,r:1}));mr(ws,r,2,r,3);
+  sc(ws,r,4,'12.Quantity\n'+g('pl-qtyUnit'),mkSt(8,true,'center',{t:1,b:1,l:1,r:1}));
+  sc(ws,r,5,'13.NET WEIGHT\n'+g('pl-nwUnit'),mkSt(8,true,'center',{t:1,b:1,l:1,r:1}));
+  sc(ws,r,6,'14.GROSS WEIGHT\n'+g('pl-gwUnit'),mkSt(8,true,'center',{t:1,b:1,l:1,r:1}));
+  sc(ws,r,7,'15.MEASUREMENT\n'+g('pl-msUnit'),mkSt(8,true,'center',{t:1,b:1,l:1,r:1}));r++;
+
+  var nmRow=r;
+  ws.getRow(r).height=12;sc(ws,r,1,'N/M',mkSt(9,true,'center',{}));
+  sc(ws,r,2,'COMMODITY: '+g('pl-comm'),mkSt(9,true,'left',{}));mr(ws,r,2,r,7);r++;
+  ws.getRow(r).height=12;sc(ws,r,2,'QUANTITY: '+g('pl-qtyShow'),mkSt(9,false,'left',{}));mr(ws,r,2,r,7);r++;
+  ws.getRow(r).height=15;sc(ws,r,2,'PACKING: '+g('pl-packing'),mkSt(9,false,'left',{}));mr(ws,r,2,r,7);r++;
+  ws.getRow(r).height=9;r++;
+
+  ws.getRow(r).height=13;
+  sc(ws,r,2,'CONTAINER NO./SEAL NO.',mkSt(9,true,'left',{t:1,b:1,l:1,r:1}));mr(ws,r,2,r,3);
+  sc(ws,r,4,'',mkSt(9,false,'center',{t:1,b:1,l:1,r:1}));
+  sc(ws,r,5,'NET WT',mkSt(9,true,'center',{t:1,b:1,l:1,r:1}));
+  sc(ws,r,6,'GROSS WT',mkSt(9,true,'center',{t:1,b:1,l:1,r:1}));
+  sc(ws,r,7,'MEASUREMENT',mkSt(9,true,'center',{t:1,b:1,l:1,r:1}));r++;
+
+  cts.forEach(function(c){
+    ws.getRow(r).height=13;
+    sc(ws,r,2,c.no||'',mkSt(9,true,'left',{t:1,b:1,l:1,r:1}));mr(ws,r,2,r,3);
+    sc(ws,r,4,'',mkSt(9,false,'center',{t:1,b:1,l:1,r:1}));
+    sc(ws,r,5,c.nw||'',mkSt(9,true,'right',{t:1,b:1,l:1,r:1}));
+    sc(ws,r,6,c.gw||'',mkSt(9,true,'right',{t:1,b:1,l:1,r:1}));
+    sc(ws,r,7,c.ms||'',mkSt(9,true,'right',{t:1,b:1,l:1,r:1}));r++;
+  });
+  var fill=r+Math.max(0,5-cts.length);
+  while(r<fill){ws.getRow(r).height=12;r++;}
+  mr(ws,nmRow,1,r-1,1);
+
+  ws.getRow(r).height=12;sc(ws,r,2,'TOTAL',mkSt(9,true,'right',{}));mr(ws,r,2,r,3);
+  var _tqUnit=g('pl-qtyUnit');var _tqVal=cts.length>0?cts.length+(_tqUnit&&_tqUnit!=='없음'?' '+_tqUnit:''):'';
+  sc(ws,r,4,_tqVal,mkSt(9,true,'center',{}));sc(ws,r,5,g('pl-tn'),mkSt(9,true,'right',{}));
+  sc(ws,r,6,g('pl-tg'),mkSt(9,true,'right',{}));sc(ws,r,7,g('pl-tm'),mkSt(9,true,'right',{}));r++;
+
+  for(var i=0;i<3;i++){ws.getRow(r).height=13;r++;}
+  ws.getRow(r).height=16;
+  var sCell=ws.getCell(r,6);sCell.value='Signed by';
+  sCell.style={font:{name:'Times New Roman',size:12,bold:true},alignment:{horizontal:'left',vertical:'middle'},fill:{type:'pattern',pattern:'none'},border:{bottom:{style:'medium',color:{argb:'FF000000'}}}};
+  mr(ws,r,6,r,7);
+}
+
+// ---- MODAL ----
+
+// ── Multi-commodity (CI) ──
+var ciComms = [];
+var _ciCommDrops = [], _plCommDrops = [];
+function _cleanDrops(arr){arr.forEach(function(l){if(l&&l.parentNode)l.parentNode.removeChild(l);});arr.length=0;}
+
+function ciAddComm(d) {
+  var L = getL();
+  var defComm = (L.commodity && L.commodity[0]) || '';
+  var defPack = (L.packing && L.packing[0]) || '';
+  var defOrig = (L.origin && L.origin[0]) || '';
+  ciComms.push(d || {comm:defComm, qty:'', up:'', packing:defPack, origin:defOrig, qtyShow:''});
+  renderCIComms();
+  sv();
+}
+
+function ciDelComm(i) {
+  ciComms.splice(i, 1);
+  renderCIComms();
+  ciCalcMulti();
+  sv();
+}
+
+function ciCommInput(i, k, v) {
+  ciComms[i][k] = v;
+  ciCalcMulti();
+  sv();
+}
+
+function f2(n) {
+  return (parseFloat(n)||0).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = el.scrollHeight + 'px';
+}
+
+function ciCalcMulti() {
+  var unit = g('ci-qtyUnit'), cur = g('ci-cur');
+  var uDisp = (unit === '' || unit === '없음') ? '' : unit;
+  var upUnit=g('ci-upUnit');var upParts=upUnit.split('/');var upCur=upParts[0]||'';var upUnitPart=upParts.length>1?upParts[1]:'';
+  var totalQty = 0, totalAmt = 0;
+  for (var i = 0; i < ciComms.length; i++) {
+    var c = ciComms[i];
+    var qty = parseFloat(c.qty) || 0;
+    var up  = parseFloat(c.up)  || 0;
+    var amt = qty * up;
+    totalQty += qty;
+    totalAmt += amt;
+    var amtEl = el('ci-amt-' + i);
+    if (amtEl) amtEl.textContent = (qty && up) ? f2(amt) : '';
+    ciComms[i].qtyShow = qty > 0 ? (qty + uDisp) : '';
+  }
+  var qsEl = el('ci-qtyShow');
+  if (qsEl) qsEl.value = ciComms.length > 0 ? (ciComms[0].qtyShow || '') : '';
+  var tq = el('ci-tq'), tu = el('ci-tu'), ta = el('ci-ta');
+  if (tq) tq.textContent = totalQty > 0 ? (totalQty + uDisp) : '';
+  if (tu) tu.textContent = ciComms.length === 1 ? (upCur + f2(parseFloat(ciComms[0].up)||0) + (upUnitPart ? '/' + upUnitPart : '')) : '';
+  if (ta) ta.textContent = totalAmt > 0 ? ((cur ? cur+' ' : '') + f2(totalAmt)) : '';
+}
+
+function renderCIComms() {
+  _cleanDrops(_ciCommDrops);
+  var nmEl = el('ci-nm');
+  var savedNM = nmEl ? nmEl.value : null;
+  var tb = el('ci-commBody');
+  if (!tb) return;
+  tb.innerHTML = '';
+  var L = getL();
+  var unit = g('ci-qtyUnit');
+
+  for (var i = 0; i < ciComms.length; i++) {
+    var c = ciComms[i];
+    var delBtn = ciComms.length > 1
+      ? '<button class="abtn" style="background:#c0392b;margin-left:2px;font-size:9px;padding:1px 4px;" onclick="ciDelComm(' + i + ')">x</button>'
+      : '';
+    var nmHtml = (i === 0)
+      ? '<td rowspan="' + (ciComms.length + 1) + '" style="text-align:center;vertical-align:middle;font-weight:700;color:#111;padding:2px;"><textarea class="f" id="ci-nm" style="text-align:center;font-weight:700;color:#111;-webkit-text-fill-color:#111;width:100%;height:auto;min-height:60px;border:none;resize:none;overflow:hidden;display:block;" oninput="autoResize(this);sv();"></textarea></td>'
+      : '';
+    var bdTop = i === 0 ? 'border-bottom:none;' : 'border-top:none;border-bottom:none;';
+    var tr = document.createElement('tr');
+    tr.innerHTML = nmHtml +
+      '<td style="vertical-align:middle;padding:3px 5px;' + bdTop + '">' +
+        (i === 0 ? '<b>COMMODITY:</b> ' : '<b style="color:#1a7a1a">&#8627;</b> ') +
+        '<input class="f ci-comm-inp" type="text" data-idx="' + i + '" value="' + (c.comm||'').replace(/"/g,'&quot;') + '" placeholder="Commodity" style="display:inline-block;width:auto;min-width:120px;font-size:11px;">' +
+        '<button class="abtn" onclick="openM(\'commodity\')" style="font-size:9px;padding:1px 4px;">관리</button>' + delBtn +
+      '</td>' +
+      '<td style="text-align:center;vertical-align:middle;' + bdTop + '">' +
+        '<input class="f" type="number" value="' + (c.qty||'') + '" placeholder="100" style="text-align:center;width:65px;" oninput="ciCommInput(' + i + ',\'qty\',this.value)">' +
+      '</td>' +
+      '<td style="text-align:center;vertical-align:middle;' + bdTop + '">' +
+        '<input class="f" type="number" value="' + (c.up||'') + '" placeholder="705" style="text-align:center;width:65px;" oninput="ciCommInput(' + i + ',\'up\',this.value)">' +
+      '</td>' +
+      '<td style="text-align:center;vertical-align:middle;' + bdTop + '">' +
+        '<span class="cv" id="ci-amt-' + i + '"></span>' +
+      '</td>';
+    tb.appendChild(tr);
+  }
+  // CI commodity autocomplete
+  tb.querySelectorAll('.ci-comm-inp').forEach(function(inp){
+    var idx=parseInt(inp.dataset.idx);
+    inp.addEventListener('input',function(){ciCommInput(idx,'comm',this.value);});
+    inp.addEventListener('change',function(){ciCommInput(idx,'comm',this.value);});
+    var dl=initCDrop(inp,function(){return getL().commodity||[];});
+    if(dl)_ciCommDrops.push(dl);
+  });
+  // ci-nm 값 복원 및 높이 자동 조정
+  var newNM = el('ci-nm');
+  if (newNM) {
+    if (savedNM !== null) newNM.value = savedNM;
+    else if (!newNM.value) newNM.value = 'N/M';
+    autoResize(newNM);
+  }
+
+  // Shared QUANTITY / PACKING / ORIGIN info row (bottom)
+  var firstC = ciComms.length > 0 ? ciComms[0] : {};
+  var packOpts = '';
+  var parr = (L.packing) || [];
+  for (var j = 0; j < parr.length; j++) {
+    packOpts += '<option value="' + parr[j] + '"' + (parr[j] === firstC.packing ? ' selected' : '') + '>' + parr[j] + '</option>';
+  }
+  var origOpts = '';
+  var oarr = (L.origin) || [];
+  for (var j = 0; j < oarr.length; j++) {
+    origOpts += '<option value="' + oarr[j] + '"' + (oarr[j] === firstC.origin ? ' selected' : '') + '>' + oarr[j] + '</option>';
+  }
+  var trInfo = document.createElement('tr');
+  trInfo.innerHTML =
+    '<td style="vertical-align:top;padding:3px 5px;border-top:none;">' +
+      '<div style="margin-bottom:3px;"><b>QUANTITY:</b> ' +
+        '<input class="f" id="ci-qtyShow" type="text" value="' + (firstC.qtyShow||'') + '" placeholder="100MT" style="display:inline-block;width:80px;" oninput="if(ciComms.length>0){ciComms[0].qtyShow=this.value;}sv();">' +
+      '</div>' +
+      '<div style="margin-bottom:3px;"><b>PACKING:</b> ' +
+        '<select class="f" style="display:inline-block;width:auto;min-width:90px;" onchange="if(ciComms.length>0){ciComms[0].packing=this.value;}ciChanged();">' + packOpts + '</select>' +
+        '<button class="abtn" onclick="openM(\'packing\')" style="font-size:9px;padding:1px 4px;">+</button>' +
+      '</div>' +
+      '<div><b>ORIGIN:</b> ' +
+        '<select class="f" style="display:inline-block;width:auto;min-width:60px;" onchange="if(ciComms.length>0){ciComms[0].origin=this.value;}sv();">' + origOpts + '</select>' +
+        '<button class="abtn" onclick="openM(\'origin\')" style="font-size:9px;padding:1px 4px;">+</button>' +
+      '</div>' +
+    '</td>' +
+    '<td style="border-top:none;"></td><td style="border-top:none;"></td><td style="border-top:none;"></td>';
+  tb.appendChild(trInfo);
+  ciCalcMulti();
+}
+
+var plExtraComms = [];
+
+function plAddExtraComm(d) {
+  plExtraComms.push(d || {comm:'', qty:'', packing:''});
+  renderPLExtraComms();
+  sv();
+}
+function plDelExtraComm(i) {
+  plExtraComms.splice(i, 1);
+  renderPLExtraComms();
+  sv();
+}
+function renderPLExtraComms() {
+  _cleanDrops(_plCommDrops);
+  var L = getL();
+  var div = el('pl-extra-comms');
+  if (!div) return;
+  div.innerHTML = '';
+  var packArr = L.packing || [];
+  for (var i = 0; i < plExtraComms.length; i++) {
+    var packOpts = '';
+    for (var j = 0; j < packArr.length; j++) {
+      packOpts += '<option value="' + packArr[j] + '"' + (packArr[j] === plExtraComms[i].packing ? ' selected' : '') + '>' + packArr[j] + '</option>';
+    }
+    var idx2 = i;
+    var wrap = document.createElement('div');
+    wrap.style.cssText = 'margin-bottom:4px;width:max-content;min-width:380px;';
+    wrap.innerHTML =
+      // Commodity row
+      '<div style="display:flex;align-items:center;gap:4px;margin-bottom:2px;">' +
+        '<input class="fs pl-comm-inp" type="text" data-idx="' + idx2 + '" value="' + (plExtraComms[idx2].comm||'').replace(/"/g,'&quot;') + '" placeholder="Commodity" style="min-width:200px;font-size:11px;font-family:inherit;border:none;border-bottom:1px solid #1a7a1a;background:transparent;outline:none;-webkit-text-fill-color:#1a7a1a;color:#1a7a1a;">' +
+        '<button class="abtn no-print" onclick="openM(\'commodity\')" style="font-size:9px;padding:1px 4px;">관리</button>' +
+        '<button class="abtn no-print" style="background:#c0392b;font-size:9px;padding:1px 4px;" onclick="plDelExtraComm(' + idx2 + ')">x</button>' +
+      '</div>' +
+      // Quantity row
+      '<div style="display:flex;align-items:center;gap:4px;margin-bottom:2px;">' +
+        '<span style="font-weight:700;font-size:11px;white-space:nowrap;">QUANTITY:</span>' +
+        '<input class="f" type="text" value="' + (plExtraComms[idx2].qty||'') + '" placeholder="100MT" style="min-width:100px;font-size:11px;font-family:inherit;border:none;border-bottom:1px solid #c86000;background:transparent;outline:none;" oninput="plExtraComms[' + idx2 + '].qty=this.value;sv();">' +
+      '</div>' +
+      // Packing row
+      '<div style="display:flex;align-items:center;gap:4px;">' +
+        '<span style="font-weight:700;font-size:11px;white-space:nowrap;">PACKING:</span>' +
+        '<select class="fs" style="min-width:130px;font-size:11px;font-family:inherit;border:none;border-bottom:1px solid #1a7a1a;background:transparent;outline:none;" onchange="plExtraComms[' + idx2 + '].packing=this.value;sv();">' + packOpts + '</select>' +
+        '<button class="abtn no-print" onclick="openM(\'packing\')" style="font-size:9px;padding:1px 4px;">관리</button>' +
+      '</div>';
+    div.appendChild(wrap);
+  }
+  // PL extra commodity autocomplete
+  div.querySelectorAll('.pl-comm-inp').forEach(function(inp){
+    var idx=parseInt(inp.dataset.idx);
+    inp.addEventListener('input',function(){plExtraComms[idx].comm=this.value;sv();});
+    inp.addEventListener('change',function(){plExtraComms[idx].comm=this.value;sv();});
+    var dl=initCDrop(inp,function(){return getL().commodity||[];});
+    if(dl)_plCommDrops.push(dl);
+  });
+}
+
+var curM=null;
+var MTIT={to:'TO',shipper:'Shipper',consignee:'Consignee',notify:'Notify Party',
+  pol:'Port of Loading',dest:'Final Destination',commodity:'Commodity',packing:'Packing',
+  origin:'Country of Origin',pricePort:'Price Port',priceCountry:'Price Country',
+  qtyUnit:'Qty Unit',upUnit:'Unit Price',amtUnit:'Amount Currency',
+  nwUnit:'Net Weight Unit',gwUnit:'Gross Weight Unit',msUnit:'Meas. Unit',writer:'Writer'};
+
+function openM(type){
+  curM=type;
+  el('mTit').textContent=(MTIT[type]||type)+' Management';
+  var isObj=OBJ.indexOf(type)>=0;
+  el('mAddr').style.display=isObj?'block':'none';
+  el('mName').placeholder=isObj?'Company name':'Item';
+  renderML();
+  el('modal').classList.add('on');
+  el('mName').value='';el('mAddr').value='';
+  setTimeout(function(){el('mName').focus();},100);
+}
+function closeM(){
+  el('modal').classList.remove('on');
+  loadSels();
+  // 모달에서 업체 수정 후 현재 선택된 업체의 주소를 최신 데이터로 강제 갱신
+  fillAddr('shipper'); fillAddr('consignee');
+  // notify: 수동 편집 중이 아닐 때만 갱신
+  if(el('ci-notify')&&!el('ci-notify').dataset.m) fillAddr('notify');
+  syncPL(); syncNotify();
+  if(ciComms.length>0)renderCIComms(); renderPLExtraComms();
+}
+function renderML(){
+  var L=getL();var arr=L[curM]||[];var isObj=OBJ.indexOf(curM)>=0;
+  el('mList').innerHTML=arr.map(function(x,i){
+    var nm=isObj?x.n:x;
+    var ad=isObj&&x.a?'<div class="mi-a">'+x.a+'</div>':'';
+    return '<div class="mi"><div class="mi-l"><div class="mi-n">'+nm+'</div>'+ad+'</div>'+
+      '<div class="mi-b">'+(isObj?'<button class="xb" style="color:#1a3a5c;" onclick="mEdit('+i+')">E</button>':'')+
+      '<button class="xb" style="color:#c00;" onclick="mDel('+i+')">X</button></div></div>';
+  }).join('');
+}
+function mDel(i){var L=getL();L[curM].splice(i,1);saveL(L);renderML();}
+function mEdit(i){
+  var L=getL();var item=L[curM][i];
+  var n=prompt('Edit name:',item.n||'');if(n===null)return;
+  var a=prompt('Edit address:',item.a||'');if(a===null)return;
+  L[curM][i]={n:n.toUpperCase(),a:a.toUpperCase()};saveL(L);renderML();
+}
+function mAdd(){
+  var v=el('mName').value.trim();if(!v)return;
+  var L=getL();if(!L[curM])L[curM]=[];
+  if(OBJ.indexOf(curM)>=0){L[curM].push({n:v.toUpperCase(),a:(el('mAddr').value.trim()).toUpperCase()});}
+  else{L[curM].push(v.toUpperCase());}
+  saveL(L);renderML();el('mName').value='';el('mAddr').value='';
+}
+el('mName').addEventListener('keydown',function(e){if(e.key==='Enter')mAdd();});
+el('modal').addEventListener('click',function(e){if(e.target===this)closeM();});
+
+// ---- INIT ----
+initDropdowns();
+loadSels();
+var hadData=ld();
+if(!hadData){
+  // 처음 실행 시 저장된 첫 번째 업체명을 기본값으로 설정
+  var _L=getL();
+  if(_L.to&&_L.to[0])s('ci-to',_L.to[0].n);
+  if(_L.shipper&&_L.shipper[0])s('ci-shipper',_L.shipper[0].n);
+  if(_L.consignee&&_L.consignee[0])s('ci-consignee',_L.consignee[0].n);
+  if(_L.notify&&_L.notify[0])s('ci-notify',_L.notify[0].n);
+  s('ci-invDate','NOV. 20, 2025');s('ci-lcDate','NOV. 13, 2025');
+  s('ci-contractDate','NOV. 11, 2025');s('ci-sailing','NOV. 30, 2025');
+  s('ci-vessel','EASLINE DALIAN/2548E');
+}
+fillAllAddrs();
+if(ciComms.length===0){ciAddComm();} else {renderCIComms();}
+renderPLExtraComms();
+loadSels(); // ensure pl-comm is populated
+if(cts.length===0){
+  [{no:'SPSU2034292/PESU0125381',nw:'20000',gw:'20110',ms:'22CBM',ctqty:'1'},
+   {no:'SLPU2040770/PESU0125349',nw:'20000',gw:'20110',ms:'22CBM'},
+   {no:'SEKU1777160/PESU0125348',nw:'20000',gw:'20110',ms:'22CBM'},
+   {no:'SPSU2013601/PESU0115330',nw:'19750',gw:'19860',ms:'22CBM'},
+   {no:'SEKU1776498/PESU0115321',nw:'20250',gw:'20360',ms:'22CBM'}
+  ].forEach(function(c){addCt(c);});
+}
+// 페이지 로드 시 ci-nm 복원 (renderCIComms 이후 element가 생성된 뒤 적용)
+(function(){
+  try{
+    var d=JSON.parse(localStorage.getItem(SK)||'{}');
+    var nmEl=el('ci-nm');
+    if(nmEl&&d['ci-nm'])nmEl.value=d['ci-nm'];
+    if(nmEl)autoResize(nmEl);
+  }catch(e){}
+  var p=el('pl-nm');if(p)autoResize(p);
+})();
+setTimeout(function(){ciCalc();plCalc();syncPL();syncNotify();},100);
+// 창 닫기/새로고침 시 강제 저장
+window.addEventListener('beforeunload',function(){sv();});
+</script>
+</body>
+</html>
