@@ -1361,8 +1361,10 @@ function ciCalcMulti() {
     totalAmt += amt;
     var amtEl = el('ci-amt-' + i);
     if (amtEl) amtEl.textContent = (qty && up) ? f2(amt) : '';
-    if (!c.qtyShow) ciComms[i].qtyShow = qty > 0 ? (qty + uDisp) : '';
+    ciComms[i].qtyShow = qty > 0 ? (qty + uDisp) : '';
   }
+  var qsEl = el('ci-qtyShow');
+  if (qsEl) qsEl.value = ciComms.length > 0 ? (ciComms[0].qtyShow || '') : '';
   var tq = el('ci-tq'), tu = el('ci-tu'), ta = el('ci-ta');
   if (tq) tq.textContent = totalQty > 0 ? (totalQty + uDisp) : '';
   if (tu) tu.textContent = ciComms.length === 1 ? (upCur + f2(parseFloat(ciComms[0].up)||0) + (upUnitPart ? '/' + upUnitPart : '')) : '';
@@ -1434,7 +1436,7 @@ function renderCIComms() {
   trInfo.innerHTML =
     '<td style="vertical-align:top;padding:3px 5px;border-top:none;">' +
       '<div style="margin-bottom:3px;"><b>QUANTITY:</b> ' +
-        '<input class="f" type="text" value="' + (firstC.qtyShow||'') + '" placeholder="100MT" style="display:inline-block;width:80px;" oninput="if(ciComms.length>0){ciComms[0].qtyShow=this.value;}sv();">' +
+        '<input class="f" id="ci-qtyShow" type="text" value="' + (firstC.qtyShow||'') + '" placeholder="100MT" style="display:inline-block;width:80px;" oninput="if(ciComms.length>0){ciComms[0].qtyShow=this.value;}sv();">' +
       '</div>' +
       '<div style="margin-bottom:3px;"><b>PACKING:</b> ' +
         '<select class="f" style="display:inline-block;width:auto;min-width:90px;" onchange="if(ciComms.length>0){ciComms[0].packing=this.value;}ciChanged();">' + packOpts + '</select>' +
