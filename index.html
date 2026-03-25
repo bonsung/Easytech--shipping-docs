@@ -1073,16 +1073,27 @@ function doReset(){
   localStorage.removeItem(SK);localStorage.removeItem(LK);location.reload();
 }
 
-// ---- AUTO TEXT SHRINK ----
+// ---- AUTO TEXT SHRINK (canvas 측정 방식) ----
+var _fitCanvas = document.createElement('canvas');
+var _fitCtx = _fitCanvas.getContext('2d');
 function fitText(inp) {
   if (!inp || inp.tagName !== 'INPUT' || inp.type === 'date' || inp.style.display === 'none') return;
+  var val = inp.value;
+  if (!val) { inp.style.fontSize = ''; return; }
+  var cs = window.getComputedStyle(inp);
+  var availW = inp.clientWidth - parseFloat(cs.paddingLeft || 0) - parseFloat(cs.paddingRight || 0);
+  if (availW <= 0) return;
+  var dispVal = cs.textTransform === 'uppercase' ? val.toUpperCase() : val;
+  var fontFamily = cs.fontFamily || "'Malgun Gothic',sans-serif";
   inp.style.fontSize = '';
-  if (inp.scrollWidth <= inp.clientWidth) return;
-  var steps = [10, 9, 8, 7];
-  for (var i = 0; i < steps.length; i++) {
-    inp.style.fontSize = steps[i] + 'px';
-    if (inp.scrollWidth <= inp.clientWidth) return;
+  var fs = 11;
+  _fitCtx.font = 'bold ' + fs + 'px ' + fontFamily;
+  if (_fitCtx.measureText(dispVal).width <= availW) return;
+  while (_fitCtx.measureText(dispVal).width > availW && fs > 7) {
+    fs -= 0.5;
+    _fitCtx.font = 'bold ' + fs + 'px ' + fontFamily;
   }
+  inp.style.fontSize = fs + 'px';
 }
 function fitAllInputs() {
   document.querySelectorAll('input.f, input.fs').forEach(fitText);
