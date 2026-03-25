@@ -1073,15 +1073,22 @@ function doReset(){
   localStorage.removeItem(SK);localStorage.removeItem(LK);location.reload();
 }
 
-// ---- AUTO TEXT SHRINK (canvas 측정 방식) ----
+// ---- AUTO TEXT SHRINK (canvas 측정 방식, input + select 공통) ----
 var _fitCanvas = document.createElement('canvas');
 var _fitCtx = _fitCanvas.getContext('2d');
 function fitText(inp) {
-  if (!inp || inp.tagName !== 'INPUT' || inp.type === 'date' || inp.style.display === 'none') return;
+  if (!inp) return;
+  var tag = inp.tagName;
+  if (tag !== 'INPUT' && tag !== 'SELECT') return;
+  if (tag === 'INPUT' && (inp.type === 'date' || inp.style.display === 'none')) return;
   var val = inp.value;
   if (!val) { inp.style.fontSize = ''; return; }
   var cs = window.getComputedStyle(inp);
-  var availW = inp.clientWidth - parseFloat(cs.paddingLeft || 0) - parseFloat(cs.paddingRight || 0);
+  var padL = parseFloat(cs.paddingLeft) || 0;
+  var padR = parseFloat(cs.paddingRight) || 0;
+  // 네이티브 select 드롭다운 화살표(~16px) 여유 확보
+  var arrowW = tag === 'SELECT' ? 16 : 0;
+  var availW = inp.clientWidth - padL - padR - arrowW;
   if (availW <= 0) return;
   var dispVal = cs.textTransform === 'uppercase' ? val.toUpperCase() : val;
   var fontFamily = cs.fontFamily || "'Malgun Gothic',sans-serif";
@@ -1096,10 +1103,10 @@ function fitText(inp) {
   inp.style.fontSize = fs + 'px';
 }
 function fitAllInputs() {
-  document.querySelectorAll('input.f, input.fs').forEach(fitText);
+  document.querySelectorAll('input.f, input.fs, select.f, select.fs').forEach(fitText);
 }
 
-document.addEventListener('change',function(e){if(e.target.classList.contains('f'))sv();});
+document.addEventListener('change',function(e){if(e.target.classList.contains('f')){sv();fitText(e.target);}});
 document.addEventListener('input',function(e){if(e.target.classList.contains('f'))sv();fitText(e.target);});
 // fs 클래스 필드(자동연동)에 커서 진입 즉시 수동 편집 상태로 전환
 // → syncNotify / syncPL 이 덮어쓰는 것을 방지 (CI notify, PL 전체 적용)
