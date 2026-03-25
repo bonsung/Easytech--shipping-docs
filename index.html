@@ -746,6 +746,7 @@ function showTab(t){
   el('tab-'+t).classList.add('on');
   if(t==='pl'){syncPL();plCalc();}
   if(t==='ci'){ciCalc();}
+  setTimeout(fitAllInputs, 0);
 }
 
 function popSel(id,arr,isObj){
