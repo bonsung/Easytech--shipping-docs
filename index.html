@@ -274,7 +274,7 @@ textarea.fs.edited{border-color:#c86000!important;}
     </tr>
   </table>
   <table class="t" style="margin-top:-1px;">
-    <colgroup><col style="width:15%"><col style="width:35%"><col style="width:16%"><col style="width:17%"><col style="width:17%"></colgroup>
+    <colgroup><col style="width:22%"><col style="width:28%"><col style="width:16%"><col style="width:17%"><col style="width:17%"></colgroup>
     <tr>
       <th style="text-align:left;vertical-align:top;padding:3px 5px;">12. Marks &amp; No.<br>of PKGS</th>
       <th style="text-align:left;vertical-align:top;padding:3px 5px;">13. Description of Goods</th>
@@ -401,7 +401,7 @@ textarea.fs.edited{border-color:#c86000!important;}
     </tr>
   </table>
   <table class="t" style="margin-top:-1px;">
-    <colgroup><col style="width:15%"><col style="width:35%"><col style="width:13%"><col style="width:12%"><col style="width:15%"><col style="width:10%"></colgroup>
+    <colgroup><col style="width:22%"><col style="width:28%"><col style="width:13%"><col style="width:12%"><col style="width:15%"><col style="width:10%"></colgroup>
     <tr class="pl-cargo-th">
       <th style="font-size:9.5px;vertical-align:top;padding:2px 3px;text-align:left;">10. Marks &amp;<br>No. of PKGS</th>
       <th style="font-size:9.5px;vertical-align:top;padding:2px 3px;text-align:left;">11. Description of Goods</th>
@@ -737,7 +737,7 @@ function notifyReset(){
 }
 
 // Called whenever CI changes — syncNotify 먼저 실행해야 pl-notify가 최신 ci-notify 값을 받음
-function ciChanged(){syncNotify();syncPL();sv();}
+function ciChanged(){syncNotify();syncPL();sv();fitAllInputs();}
 
 function showTab(t){
   document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('on');});
@@ -1073,8 +1073,23 @@ function doReset(){
   localStorage.removeItem(SK);localStorage.removeItem(LK);location.reload();
 }
 
+// ---- AUTO TEXT SHRINK ----
+function fitText(inp) {
+  if (!inp || inp.tagName !== 'INPUT' || inp.type === 'date' || inp.style.display === 'none') return;
+  inp.style.fontSize = '';
+  if (inp.scrollWidth <= inp.clientWidth) return;
+  var steps = [10, 9, 8, 7];
+  for (var i = 0; i < steps.length; i++) {
+    inp.style.fontSize = steps[i] + 'px';
+    if (inp.scrollWidth <= inp.clientWidth) return;
+  }
+}
+function fitAllInputs() {
+  document.querySelectorAll('input.f, input.fs').forEach(fitText);
+}
+
 document.addEventListener('change',function(e){if(e.target.classList.contains('f'))sv();});
-document.addEventListener('input',function(e){if(e.target.classList.contains('f'))sv();});
+document.addEventListener('input',function(e){if(e.target.classList.contains('f'))sv();fitText(e.target);});
 // fs 클래스 필드(자동연동)에 커서 진입 즉시 수동 편집 상태로 전환
 // → syncNotify / syncPL 이 덮어쓰는 것을 방지 (CI notify, PL 전체 적용)
 document.addEventListener('focusin',function(e){
@@ -1620,7 +1635,7 @@ if(cts.length===0){
   }catch(e){}
   var p=el('pl-nm');if(p)autoResize(p);
 })();
-setTimeout(function(){ciCalc();plCalc();syncPL();syncNotify();},100);
+setTimeout(function(){ciCalc();plCalc();syncPL();syncNotify();fitAllInputs();},100);
 // 창 닫기/새로고침 시 강제 저장
 window.addEventListener('beforeunload',function(){sv();});
 </script>
