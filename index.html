@@ -435,7 +435,7 @@ textarea.fs.edited{border-color:#c86000!important;}
       <td colspan="2" style="vertical-align:top;padding:5px 6px;border-right:none;">
         <div style="margin-bottom:2px;display:flex;align-items:center;gap:4px;">
           <span style="font-weight:700;white-space:nowrap;">COMMODITY:</span>
-          <input class="fs" id="pl-comm" type="text" style="min-width:100px;font-size:11px;font-family:inherit;border:none;border-bottom:1px solid #1a7a1a;background:transparent;outline:none;" oninput="plManual(this)">
+          <input class="fs" id="pl-comm" type="text" style="flex:1;min-width:0;font-size:11px;font-family:inherit;border:none;border-bottom:1px solid #1a7a1a;background:transparent;outline:none;" oninput="plManual(this)">
           <button class="abtn" onclick="openM('commodity')">관리</button>
         </div>
         <div style="margin-bottom:4px;"><span style="font-weight:700;">QUANTITY: </span>
@@ -1436,9 +1436,11 @@ function renderCIComms() {
     var tr = document.createElement('tr');
     tr.innerHTML = nmHtml +
       '<td style="vertical-align:middle;padding:3px 5px;' + bdTop + '">' +
-        (i === 0 ? '<b>COMMODITY:</b> ' : '<b style="color:#1a7a1a">&#8627;</b> ') +
-        '<input class="f ci-comm-inp" type="text" data-idx="' + i + '" value="' + (c.comm||'').replace(/"/g,'&quot;') + '" placeholder="Commodity" style="display:inline-block;width:auto;min-width:120px;font-size:11px;">' +
-        '<button class="abtn" onclick="openM(\'commodity\')" style="font-size:9px;padding:1px 4px;">관리</button>' + delBtn +
+        '<div class="r2">' +
+          (i === 0 ? '<b style="white-space:nowrap">COMMODITY:</b>' : '<b style="white-space:nowrap;color:#1a7a1a">&#8627;</b>') +
+          '<input class="f ci-comm-inp" type="text" data-idx="' + i + '" value="' + (c.comm||'').replace(/"/g,'&quot;') + '" placeholder="Commodity" style="flex:1;min-width:0;font-size:11px;">' +
+          '<button class="abtn" onclick="openM(\'commodity\')" style="font-size:9px;padding:1px 4px;">관리</button>' + delBtn +
+        '</div>' +
       '</td>' +
       '<td style="text-align:center;vertical-align:middle;' + bdTop + '">' +
         '<input class="f" type="number" value="' + (c.qty||'') + '" placeholder="100" style="text-align:center;width:65px;" oninput="ciCommInput(' + i + ',\'qty\',this.value)">' +
@@ -1497,6 +1499,7 @@ function renderCIComms() {
     '<td style="border-top:none;"></td><td style="border-top:none;"></td><td style="border-top:none;"></td>';
   tb.appendChild(trInfo);
   ciCalcMulti();
+  setTimeout(fitAllInputs, 0);
 }
 
 var plExtraComms = [];
@@ -1530,11 +1533,11 @@ function renderPLExtraComms() {
     }
     var idx2 = i;
     var wrap = document.createElement('div');
-    wrap.style.cssText = 'margin-bottom:4px;width:max-content;min-width:380px;';
+    wrap.style.cssText = 'margin-bottom:4px;width:100%;';
     wrap.innerHTML =
       // Commodity row
       '<div style="display:flex;align-items:center;gap:4px;margin-bottom:2px;">' +
-        '<input class="fs pl-comm-inp" type="text" data-idx="' + idx2 + '" value="' + (plExtraComms[idx2].comm||'').replace(/"/g,'&quot;') + '" placeholder="Commodity" style="min-width:200px;font-size:11px;font-family:inherit;border:none;border-bottom:1px solid #1a7a1a;background:transparent;outline:none;-webkit-text-fill-color:#1a7a1a;color:#1a7a1a;">' +
+        '<input class="fs pl-comm-inp" type="text" data-idx="' + idx2 + '" value="' + (plExtraComms[idx2].comm||'').replace(/"/g,'&quot;') + '" placeholder="Commodity" style="flex:1;min-width:0;font-size:11px;font-family:inherit;border:none;border-bottom:1px solid #1a7a1a;background:transparent;outline:none;-webkit-text-fill-color:#1a7a1a;color:#1a7a1a;">' +
         '<button class="abtn no-print" onclick="openM(\'commodity\')" style="font-size:9px;padding:1px 4px;">관리</button>' +
         '<button class="abtn no-print" style="background:#c0392b;font-size:9px;padding:1px 4px;" onclick="plDelExtraComm(' + idx2 + ')">x</button>' +
       '</div>' +
@@ -1559,6 +1562,7 @@ function renderPLExtraComms() {
     var dl=initCDrop(inp,function(){return getL().commodity||[];});
     if(dl)_plCommDrops.push(dl);
   });
+  setTimeout(fitAllInputs, 0);
 }
 
 var curM=null;
