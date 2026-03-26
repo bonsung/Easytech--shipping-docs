@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>Shipping Docs</title>
 <script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Malgun Gothic',sans-serif;background:#dde;font-size:12px;}
@@ -486,6 +487,20 @@ textarea.fs.edited{border-color:#c86000!important;}
 
 <script>
 var SK='SD_CLEAN_1', LK='SD_LIST_CLEAN_1';
+
+// ---- SUPABASE ----
+var _sb=supabase.createClient(
+  'https://bpchwobwwkplmrfmpesm.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJwY2h3b2J3d2twbG1yZm1wZXNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwNTc3MjQsImV4cCI6MjA4NzYzMzcyNH0.Ox73ZTcpl_yT4UrZEI1PooBfrx_8MVXaZkuv5lOrdTk'
+);
+function _sbSaveForm(d){
+  _sb.from('form_state').upsert({id:'main',data:d,updated_at:new Date().toISOString()})
+    .then(function(r){if(r.error)console.warn('SB form_state save error:',r.error);});
+}
+function _sbSaveList(l){
+  _sb.from('master_lists').upsert({id:'main',data:l,updated_at:new Date().toISOString()})
+    .then(function(r){if(r.error)console.warn('SB master_lists save error:',r.error);});
+}
 var OBJ=['to','shipper','consignee','notify'];
 var DEF={
   to:[
@@ -601,7 +616,7 @@ var DEF={
 };
 
 function getL(){try{return JSON.parse(localStorage.getItem(LK))||DEF;}catch(e){return DEF;}}
-function saveL(l){localStorage.setItem(LK,JSON.stringify(l));}
+function saveL(l){localStorage.setItem(LK,JSON.stringify(l));_sbSaveList(l);}
 function mergeDefaults(){
   var L=getL(),changed=false;
   var strKeys=['qtyUnit','gwUnit','nwUnit','msUnit','upUnit','amtUnit','pol','dest','commodity','packing','origin','pricePort','priceCountry','writer'];
@@ -1041,6 +1056,7 @@ function sv(){
   d._ciComms=JSON.stringify(ciComms);
   d._plExtraComms=JSON.stringify(plExtraComms);
   try{localStorage.setItem(SK,JSON.stringify(d));}catch(e){}
+  _sbSaveForm(d);
 }
 
 function ld(){
@@ -1071,7 +1087,10 @@ function ld(){
 
 function doReset(){
   if(!confirm('Reset all data?'))return;
-  localStorage.removeItem(SK);localStorage.removeItem(LK);location.reload();
+  localStorage.removeItem(SK);localStorage.removeItem(LK);
+  _sb.from('form_state').delete().eq('id','main').then(function(){});
+  _sb.from('master_lists').delete().eq('id','main').then(function(){});
+  location.reload();
 }
 
 // ---- AUTO TEXT SHRINK (canvas 측정 방식, input + select 공통) ----
@@ -1621,44 +1640,54 @@ function mAdd(){
 el('mName').addEventListener('keydown',function(e){if(e.key==='Enter')mAdd();});
 el('modal').addEventListener('click',function(e){if(e.target===this)closeM();});
 
-// ---- INIT ----
-initDropdowns();
-loadSels();
-var hadData=ld();
-if(!hadData){
-  // 처음 실행 시 저장된 첫 번째 업체명을 기본값으로 설정
-  var _L=getL();
-  if(_L.to&&_L.to[0])s('ci-to',_L.to[0].n);
-  if(_L.shipper&&_L.shipper[0])s('ci-shipper',_L.shipper[0].n);
-  if(_L.consignee&&_L.consignee[0])s('ci-consignee',_L.consignee[0].n);
-  if(_L.notify&&_L.notify[0])s('ci-notify',_L.notify[0].n);
-  s('ci-invDate','NOV. 20, 2025');s('ci-lcDate','NOV. 13, 2025');
-  s('ci-contractDate','NOV. 11, 2025');s('ci-sailing','NOV. 30, 2025');
-  s('ci-vessel','EASLINE DALIAN/2548E');
-}
-fillAllAddrs();
-if(ciComms.length===0){ciAddComm();} else {renderCIComms();}
-renderPLExtraComms();
-loadSels(); // ensure pl-comm is populated
-if(cts.length===0){
-  [{no:'SPSU2034292/PESU0125381',nw:'20000',gw:'20110',ms:'22CBM',ctqty:'1'},
-   {no:'SLPU2040770/PESU0125349',nw:'20000',gw:'20110',ms:'22CBM'},
-   {no:'SEKU1777160/PESU0125348',nw:'20000',gw:'20110',ms:'22CBM'},
-   {no:'SPSU2013601/PESU0115330',nw:'19750',gw:'19860',ms:'22CBM'},
-   {no:'SEKU1776498/PESU0115321',nw:'20250',gw:'20360',ms:'22CBM'}
-  ].forEach(function(c){addCt(c);});
-}
-// 페이지 로드 시 ci-nm 복원 (renderCIComms 이후 element가 생성된 뒤 적용)
-(function(){
+// ---- INIT (Supabase 우선 로드, localStorage 캐시 fallback) ----
+(async function(){
   try{
-    var d=JSON.parse(localStorage.getItem(SK)||'{}');
-    var nmEl=el('ci-nm');
-    if(nmEl&&d['ci-nm'])nmEl.value=d['ci-nm'];
-    if(nmEl)autoResize(nmEl);
+    var r1=await _sb.from('form_state').select('data').eq('id','main').single();
+    if(r1.data&&r1.data.data)localStorage.setItem(SK,JSON.stringify(r1.data.data));
   }catch(e){}
-  var p=el('pl-nm');if(p)autoResize(p);
+  try{
+    var r2=await _sb.from('master_lists').select('data').eq('id','main').single();
+    if(r2.data&&r2.data.data)localStorage.setItem(LK,JSON.stringify(r2.data.data));
+  }catch(e){}
+  initDropdowns();
+  loadSels();
+  var hadData=ld();
+  if(!hadData){
+    // 처음 실행 시 저장된 첫 번째 업체명을 기본값으로 설정
+    var _L=getL();
+    if(_L.to&&_L.to[0])s('ci-to',_L.to[0].n);
+    if(_L.shipper&&_L.shipper[0])s('ci-shipper',_L.shipper[0].n);
+    if(_L.consignee&&_L.consignee[0])s('ci-consignee',_L.consignee[0].n);
+    if(_L.notify&&_L.notify[0])s('ci-notify',_L.notify[0].n);
+    s('ci-invDate','NOV. 20, 2025');s('ci-lcDate','NOV. 13, 2025');
+    s('ci-contractDate','NOV. 11, 2025');s('ci-sailing','NOV. 30, 2025');
+    s('ci-vessel','EASLINE DALIAN/2548E');
+  }
+  fillAllAddrs();
+  if(ciComms.length===0){ciAddComm();} else {renderCIComms();}
+  renderPLExtraComms();
+  loadSels(); // ensure pl-comm is populated
+  if(cts.length===0){
+    [{no:'SPSU2034292/PESU0125381',nw:'20000',gw:'20110',ms:'22CBM',ctqty:'1'},
+     {no:'SLPU2040770/PESU0125349',nw:'20000',gw:'20110',ms:'22CBM'},
+     {no:'SEKU1777160/PESU0125348',nw:'20000',gw:'20110',ms:'22CBM'},
+     {no:'SPSU2013601/PESU0115330',nw:'19750',gw:'19860',ms:'22CBM'},
+     {no:'SEKU1776498/PESU0115321',nw:'20250',gw:'20360',ms:'22CBM'}
+    ].forEach(function(c){addCt(c);});
+  }
+  // 페이지 로드 시 ci-nm 복원 (renderCIComms 이후 element가 생성된 뒤 적용)
+  (function(){
+    try{
+      var d=JSON.parse(localStorage.getItem(SK)||'{}');
+      var nmEl=el('ci-nm');
+      if(nmEl&&d['ci-nm'])nmEl.value=d['ci-nm'];
+      if(nmEl)autoResize(nmEl);
+    }catch(e){}
+    var p=el('pl-nm');if(p)autoResize(p);
+  })();
+  setTimeout(function(){ciCalc();plCalc();syncPL();syncNotify();fitAllInputs();},100);
 })();
-setTimeout(function(){ciCalc();plCalc();syncPL();syncNotify();fitAllInputs();},100);
 // 창 닫기/새로고침 시 강제 저장
 window.addEventListener('beforeunload',function(){sv();});
 </script>
