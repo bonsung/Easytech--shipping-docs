@@ -287,7 +287,7 @@ textarea.fs.edited{border-color:#c86000!important;}
       </th>
       <th style="text-align:left;vertical-align:top;padding:3px 5px;">15. Unit Price<br>
         <div class="r2" style="justify-content:center;margin-top:3px;">
-          <select class="f" id="ci-upUnit" style="flex:1;min-width:0;font-size:11px;" onchange="ciCalc()"><option>USD/MT</option><option>USD/KG</option><option>USD/PCS</option></select>
+          <select class="f" id="ci-upUnit" style="flex:1;min-width:0;font-size:11px;" onchange="ciCalc()"><option>USD/MT</option><option>USD/KG</option><option>USD/PCS</option><option>CNY/MT</option><option>CNY/KG</option><option>CNY/PCS</option></select>
           <button class="abtn" onclick="openM('upUnit')">+</button>
         </div>
       </th>
@@ -607,7 +607,7 @@ var DEF={
   pricePort:['BUSAN','INCHEON','QINGDAO','SHANGHAI'],
   priceCountry:['SOUTH KOREA','CHINA','JAPAN','USA'],
   qtyUnit:['','MT','KGS','KG','CBM','PCS','SET','FLEXIBAG'],
-  upUnit:['','USD/MT','USD/KG','USD/PCS'],
+  upUnit:['','USD/MT','USD/KG','USD/PCS','CNY/MT','CNY/KG','CNY/PCS'],
   amtUnit:['','USD','EUR','CNY'],
   nwUnit:['','KGS','MT','KG'],
   gwUnit:['','KGS','KG','MT'],
@@ -868,6 +868,7 @@ function loadSels(){
   popSel('ci-pol',L.pol,false);popSel('ci-dest',L.dest,false);
   popSel('ci-pp',L.pricePort,false);
   popSel('ci-pc',L.priceCountry,false);popSel('ci-qtyUnit',L.qtyUnit,false);
+  popSel('ci-upUnit',L.upUnit,false);
   popSel('ci-cur',L.amtUnit,false);
   popSel('pl-qtyUnit',L.qtyUnit,false);popSel('writer',L.writer,false);
   popSel('pl-gwUnit',L.gwUnit,false);
@@ -1636,6 +1637,9 @@ function mAdd(){
   if(OBJ.indexOf(curM)>=0){L[curM].push({n:v.toUpperCase(),a:(el('mAddr').value.trim()).toUpperCase()});}
   else{L[curM].push(v.toUpperCase());}
   saveL(L);renderML();el('mName').value='';el('mAddr').value='';
+  // 드롭다운 즉시 갱신
+  var selMap={qtyUnit:['ci-qtyUnit','pl-qtyUnit'],upUnit:['ci-upUnit'],amtUnit:['ci-cur'],gwUnit:['pl-gwUnit'],nwUnit:['pl-nwUnit'],msUnit:['pl-msUnit'],pol:['ci-pol'],dest:['ci-dest'],pricePort:['ci-pp'],priceCountry:['ci-pc'],writer:['writer']};
+  if(selMap[curM]){selMap[curM].forEach(function(id){popSel(id,L[curM],false);});}
 }
 el('mName').addEventListener('keydown',function(e){if(e.key==='Enter')mAdd();});
 el('modal').addEventListener('click',function(e){if(e.target===this)closeM();});
