@@ -1114,29 +1114,41 @@ function ld(){
 
 async function doReset(){
   if(!confirm('Reset all data?'))return;
-  // 1. Clear storage (await Supabase deletes before UI update)
+  // 1. Clear storage (await Supabase deletes)
   localStorage.removeItem(SK); localStorage.removeItem(LK);
   try{await _sb.from('form_state').delete().eq('id','main');}catch(e){}
   try{await _sb.from('master_lists').delete().eq('id','main');}catch(e){}
-  // 2. Clear ALL input/textarea — no class filter, catches every field
-  document.querySelectorAll('input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"])').forEach(function(e){
-    e.value=''; e.style.fontSize=''; delete e.dataset.m; e.classList.remove('edited');
-  });
-  document.querySelectorAll('textarea').forEach(function(e){
-    e.value=''; e.style.height=''; delete e.dataset.m; e.classList.remove('edited');
-  });
-  // 3. Reset all selects to first option
-  document.querySelectorAll('select').forEach(function(e){
-    e.selectedIndex=0; e.style.fontSize=''; delete e.dataset.m; e.classList.remove('edited');
-  });
-  // 4. Restore none-sections to visible/editable
+
+  // Helper: clear every input/textarea/select in the document
+  function _clearAll(){
+    document.querySelectorAll('input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"])').forEach(function(e){
+      e.value=''; e.style.fontSize=''; delete e.dataset.m; e.classList.remove('edited');
+    });
+    document.querySelectorAll('textarea').forEach(function(e){
+      e.value=''; e.style.height=''; delete e.dataset.m; e.classList.remove('edited');
+    });
+    // selectedIndex=-1 → 아무 옵션도 선택 안 됨 (진짜 빈칸)
+    document.querySelectorAll('select').forEach(function(e){
+      e.selectedIndex=-1; e.style.fontSize=''; delete e.dataset.m; e.classList.remove('edited');
+    });
+  }
+
+  // 2. 1차 clear — 기존 DOM 필드 전체 초기화
+  _clearAll();
+
+  // 3. Restore none-sections to visible/editable state
   ['inv','lc','contract'].forEach(function(k){noneApply(k,false);});
-  // 5. Reset dynamic arrays and re-render empty
+
+  // 4. Reset dynamic arrays and re-render empty rows
   ciComms=[{comm:'',qty:'',up:'',packing:'',origin:'',qtyShow:''}];
   plExtraComms=[]; cts=[];
-  renderCIComms();
+  renderCIComms();      // → packing/origin select 새로 생성됨
   renderPLExtraComms();
   renderCts();
+
+  // 5. 2차 clear — renderCIComms()가 새로 만든 packing/origin select 등도 초기화
+  _clearAll();
+
   ciCalc(); plCalc(); fitAllInputs();
 }
 
