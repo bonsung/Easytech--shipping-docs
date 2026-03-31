@@ -1112,11 +1112,11 @@ function ld(){
   }catch(e){return false;}
 }
 
-function doReset(){
+async function doReset(){
   if(!confirm('Reset all data?'))return;
   localStorage.removeItem(SK);localStorage.removeItem(LK);
-  _sb.from('form_state').delete().eq('id','main').then(function(){});
-  _sb.from('master_lists').delete().eq('id','main').then(function(){});
+  try{await _sb.from('form_state').delete().eq('id','main');}catch(e){}
+  try{await _sb.from('master_lists').delete().eq('id','main');}catch(e){}
   location.reload();
 }
 
