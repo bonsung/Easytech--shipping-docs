@@ -1127,7 +1127,6 @@ async function doReset(){
     document.querySelectorAll('textarea').forEach(function(e){
       e.value=''; e.style.height=''; delete e.dataset.m; e.classList.remove('edited');
     });
-    // selectedIndex=-1 → 아무 옵션도 선택 안 됨 (진짜 빈칸)
     document.querySelectorAll('select').forEach(function(e){
       e.selectedIndex=-1; e.style.fontSize=''; delete e.dataset.m; e.classList.remove('edited');
     });
@@ -1142,14 +1141,43 @@ async function doReset(){
   // 4. Reset dynamic arrays and re-render empty rows
   ciComms=[{comm:'',qty:'',up:'',packing:'',origin:'',qtyShow:''}];
   plExtraComms=[]; cts=[];
-  renderCIComms();      // → packing/origin select 새로 생성됨
+  renderCIComms();
   renderPLExtraComms();
   renderCts();
 
-  // 5. 2차 clear — renderCIComms()가 새로 만든 packing/origin select 등도 초기화
+  // 5. 2차 clear — renderCIComms()가 새로 생성한 packing/origin select 등 포함
   _clearAll();
 
+  // 6. ID별 직접 초기화 — _clearAll() 후에도 잔존 가능한 필드 보장
+  // CI 날짜·선박·번호 필드 (readonly 포함)
+  ['ci-vessel','ci-sailing',
+   'ci-invNo','ci-invDate','ci-lcNo','ci-lcDate','ci-contractNo','ci-contractDate',
+   'ci-remark','ci-nm','ci-qtyShow',
+   'ci-pt','ci-pp','ci-pc'].forEach(function(id){s(id,'');});
+  // PL 동기화 필드
+  ['pl-vessel','pl-sailing','pl-invNo','pl-invDate',
+   'pl-shipper','pl-shipperAddr','pl-consignee','pl-consigneeAddr',
+   'pl-notify','pl-notifyAddr','pl-comm','pl-packing',
+   'pl-pol','pl-dest','pl-remark','pl-nm','pl-qtyShow',
+   'pl-tq','pl-tn','pl-tg','pl-tm'].forEach(function(id){s(id,'');});
+
+  // 7. #ci-commBody 안 동적 생성 input/select 직접 초기화
+  var commBody=el('ci-commBody');
+  if(commBody){
+    commBody.querySelectorAll('input').forEach(function(e){e.value='';});
+    commBody.querySelectorAll('select').forEach(function(e){e.selectedIndex=-1;});
+  }
+
+  // 8. 계산 결과 표시 span/td textContent 초기화
+  ['ci-tq','ci-tu','ci-ta'].forEach(function(id){var e=el(id);if(e)e.textContent='';});
+  for(var _i=0;_i<10;_i++){var _a=el('ci-amt-'+_i);if(_a)_a.textContent='';else break;}
+  var _camt=el('ci-amt');if(_camt)_camt.textContent='';
+
   ciCalc(); plCalc(); fitAllInputs();
+
+  // 9. ciCalcMulti가 up=0일 때 ci-tu에 '0.00'을 쓰는 것 방지 — 계산 후 강제 초기화
+  ['ci-tq','ci-tu','ci-ta'].forEach(function(id){var e=el(id);if(e)e.textContent='';});
+  for(var _j=0;_j<10;_j++){var _b=el('ci-amt-'+_j);if(_b)_b.textContent='';else break;}
 }
 
 // ---- AUTO TEXT SHRINK (canvas 측정 방식, input + select 공통) ----
