@@ -1178,6 +1178,29 @@ async function doReset(){
   // 9. ciCalcMulti가 up=0일 때 ci-tu에 '0.00'을 쓰는 것 방지 — 계산 후 강제 초기화
   ['ci-tq','ci-tu','ci-ta'].forEach(function(id){var e=el(id);if(e)e.textContent='';});
   for(var _j=0;_j<10;_j++){var _b=el('ci-amt-'+_j);if(_b)_b.textContent='';else break;}
+
+  // 10. placeholder 초기화 — Reset 후 빈 필드가 이전 값처럼 보이는 문제 해결
+  // 남아있는 것처럼 보이는 값들은 실제 value가 아닌 placeholder 텍스트였음
+  ['ci-vessel','ci-sailing','ci-invDate','ci-lcDate','ci-contractDate'].forEach(function(id){
+    var e=el(id); if(e) e.placeholder='';
+  });
+  if(commBody){
+    commBody.querySelectorAll('input').forEach(function(e){e.placeholder='';});
+  }
+  var _qs=el('ci-qtyShow'); if(_qs) _qs.placeholder='';
+
+  // 11. 새로고침 시 INIT 기본값 재적용 방지
+  // ld()가 has=true를 반환하도록 ci-nm에 zero-width space를 sentinel로 저장
+  // → INIT의 if(!hadData) 블록(vessel/날짜/컨테이너 기본값) 실행 차단
+  var _empty={};
+  CI_F.forEach(function(id){_empty[id]='';});
+  PL_F.forEach(function(id){_empty[id]='';});
+  PL_S.forEach(function(id){_empty[id]='';});
+  _empty['ci-nm']='\u200B'; // invisible sentinel: ld()가 has=true 반환하게 함
+  _empty._cts=JSON.stringify([{no:'',nw:'',gw:'',ms:'',ctqty:'1'}]); // 기본 컨테이너 재생성 방지
+  _empty._ciComms=JSON.stringify([{comm:'',qty:'',up:'',packing:'',origin:'',qtyShow:''}]);
+  _empty._plExtraComms='[]';
+  try{localStorage.setItem(SK,JSON.stringify(_empty));}catch(e){}
 }
 
 // ---- AUTO TEXT SHRINK (canvas 측정 방식, input + select 공통) ----
