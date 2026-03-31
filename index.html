@@ -98,6 +98,19 @@ textarea.fs.edited{border-color:#c86000!important;}
 .cdrop-item:last-child{border-bottom:none;}
 .cdrop-item:hover{background:#fff8f0;}
 
+/* ---- BL Upload Section ---- */
+#bl-upload-section{max-width:860px;margin:10px auto 0;background:#eef2ff;border:1px solid #4a6aaa;border-radius:6px;padding:10px 14px;font-family:'Malgun Gothic',sans-serif;}
+.bl-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+#bl-api-key{flex:1;min-width:220px;padding:4px 8px;border:1px solid #aab;border-radius:3px;font-size:11px;font-family:inherit;color:#333;}
+#bl-api-key:focus{outline:none;border-color:#4a6aaa;background:#fff;}
+.bl-btn{padding:5px 13px;border:none;border-radius:3px;cursor:pointer;font-size:11px;font-weight:700;background:#1a3a5c;color:white;}
+.bl-btn:hover{background:#2a5a8c;}
+.bl-btn:disabled{background:#999;cursor:not-allowed;}
+#bl-status{font-size:11px;color:#555;}
+#bl-blno-row{display:none;align-items:center;gap:8px;margin-top:7px;}
+#bl-blno-label{font-size:11px;font-weight:700;color:#1a3a5c;white-space:nowrap;}
+#bl-blno{min-width:160px;padding:3px 7px;border:1.5px solid #4a6aaa;border-radius:3px;font-size:12px;font-weight:700;color:#1a3a5c;background:#dce5ff;font-family:inherit;letter-spacing:1px;}
+
 @media print{
   #bar{display:none!important;}
   body{background:white;}
@@ -142,6 +155,21 @@ textarea.fs.edited{border-color:#c86000!important;}
     <button class="btn bxl" onclick="doExcel()">Excel</button>
     <button class="btn bpdf" onclick="window.print()">PDF</button>
     <button class="btn brs" onclick="doReset()">Reset</button>
+  </div>
+</div>
+
+<!-- BL UPLOAD SECTION -->
+<div id="bl-upload-section" class="no-print">
+  <div class="bl-row">
+    <strong style="color:#1a3a5c;font-size:12px;white-space:nowrap;">📄 BL 자동입력</strong>
+    <input type="text" id="bl-api-key" placeholder="Claude API Key (sk-ant-...)" onchange="blSaveKey(this.value)">
+    <input type="file" id="bl-file-input" accept=".jpg,.jpeg,.png,.pdf" style="display:none;" onchange="blHandleFile(this)">
+    <button class="bl-btn" onclick="document.getElementById('bl-file-input').click()">📄 BL 업로드하여 자동입력</button>
+    <span id="bl-status"></span>
+  </div>
+  <div id="bl-blno-row">
+    <span id="bl-blno-label">B/L NO :</span>
+    <input type="text" id="bl-blno" readonly>
   </div>
 </div>
 
@@ -1695,6 +1723,246 @@ el('modal').addEventListener('click',function(e){if(e.target===this)closeM();});
 })();
 // 창 닫기/새로고침 시 강제 저장
 window.addEventListener('beforeunload',function(){sv();});
+
+// ============================================================
+//  BL UPLOAD → CI/PL 자동입력
+// ============================================================
+
+var BL_KEY_STORE = 'BL_API_KEY';
+
+function blSaveKey(val) {
+  if (val && val.trim()) localStorage.setItem(BL_KEY_STORE, val.trim());
+}
+
+function blLoadKey() {
+  var k = localStorage.getItem(BL_KEY_STORE);
+  if (k) { var el2 = document.getElementById('bl-api-key'); if (el2) el2.value = k; }
+}
+
+function blSetStatus(msg, color) {
+  var st = document.getElementById('bl-status');
+  if (st) { st.textContent = msg; st.style.color = color || '#555'; }
+}
+
+function blImageToBase64(file) {
+  return new Promise(function(resolve, reject) {
+    var reader = new FileReader();
+    reader.onload = function(e) { resolve({ base64: e.target.result.split(',')[1] }); };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function blLoadScript(src) {
+  return new Promise(function(resolve, reject) {
+    if (document.querySelector('script[src="' + src + '"]')) { resolve(); return; }
+    var sc = document.createElement('script'); sc.src = src;
+    sc.onload = resolve; sc.onerror = reject;
+    document.head.appendChild(sc);
+  });
+}
+
+async function blPdfToBase64(file) {
+  var cdnBase = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
+  await blLoadScript(cdnBase + 'pdf.min.js');
+  window.pdfjsLib.GlobalWorkerOptions.workerSrc = cdnBase + 'pdf.worker.min.js';
+  var buf = await file.arrayBuffer();
+  var pdf = await window.pdfjsLib.getDocument({ data: buf }).promise;
+  var page = await pdf.getPage(1);
+  var vp = page.getViewport({ scale: 2.0 });
+  var canvas = document.createElement('canvas');
+  canvas.width = vp.width; canvas.height = vp.height;
+  await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+  return { base64: canvas.toDataURL('image/png').split(',')[1] };
+}
+
+async function blCallClaude(apiKey, base64, mediaType) {
+  var prompt = '이 이미지는 선하증권(Bill of Lading / FBL)입니다.\n' +
+    '아래 항목을 정확히 추출하여 순수 JSON만 반환하세요 (마크다운/설명 없이).\n\n' +
+    '{\n' +
+    '  "shipper": "Shipper 회사명 (full name)",\n' +
+    '  "shipperAddr": "Shipper 주소",\n' +
+    '  "consignee": "Consignee 회사명",\n' +
+    '  "consigneeAddr": "Consignee 주소",\n' +
+    '  "notifyParty": "Notify Party 회사명",\n' +
+    '  "notifyPartyAddr": "Notify Party 주소",\n' +
+    '  "vessel": "Ocean Vessel + Voyage No (예: POS SHANGHAI 1299E)",\n' +
+    '  "pol": "Port of Loading (예: QINGDAO PORT, CHINA)",\n' +
+    '  "pod": "Port of Discharge (예: BUSAN, KOREA)",\n' +
+    '  "blNo": "B/L Number 또는 FBL No",\n' +
+    '  "description": "실제 화학물질명 또는 화물 품명만 추출 (예: CYCLOHEXANONE, METHANOL). \'SHIPPER\'S LOAD & COUNT\', \'SAID TO CONTAIN\', \'FREIGHT\', \'PREPAID\', HS CODE, 포장 정보 등 화물명이 아닌 모든 문구는 제외하고 순수 화물명만 반환",\n' +
+    '  "containers": ["CONTAINER_NO/SEAL_NO", "..."],\n' +
+    '  "grossWeight": "총 Gross Weight 숫자만 (단위 제외, 예: 100110)",\n' +
+    '  "measurement": "총 Measurement CBM 숫자만 (단위 제외, 예: 110)"\n' +
+    '}\n\n' +
+    '없는 항목은 빈 문자열("")로, containers가 없으면 빈 배열([])로 처리하세요.';
+
+  var resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'content-type': 'application/json',
+      'anthropic-dangerous-direct-browser-calls': 'true',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1024,
+      messages: [{
+        role: 'user',
+        content: [
+          { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
+          { type: 'text', text: prompt }
+        ]
+      }]
+    })
+  });
+
+  if (!resp.ok) {
+    var errTxt = await resp.text();
+    throw new Error('API ' + resp.status + ': ' + errTxt.slice(0, 200));
+  }
+  var result = await resp.json();
+  var text = result.content[0].text.trim();
+  var m = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+  if (m) text = m[1];
+  return JSON.parse(text);
+}
+
+function blFillForm(data) {
+  function setSelectVal(id, val) {
+    if (!val) return;
+    var v = val.toUpperCase();
+    var se = document.getElementById(id);
+    if (!se) return;
+    for (var i = 0; i < se.options.length; i++) {
+      if (se.options[i].value.toUpperCase() === v || se.options[i].text.toUpperCase() === v) {
+        se.selectedIndex = i; return;
+      }
+    }
+    var opt = document.createElement('option');
+    opt.value = v; opt.textContent = v;
+    se.appendChild(opt); se.value = v;
+  }
+
+  // 1. Shipper
+  if (data.shipper) {
+    s('ci-shipper', data.shipper.toUpperCase());
+    if (data.shipperAddr) s('ci-shipperAddr', data.shipperAddr.toUpperCase());
+  }
+
+  // 2. Consignee
+  if (data.consignee) {
+    s('ci-consignee', data.consignee.toUpperCase());
+    if (data.consigneeAddr) s('ci-consigneeAddr', data.consigneeAddr.toUpperCase());
+    s('ci-to', data.consignee.toUpperCase());
+  }
+
+  // 3. Notify Party
+  if (data.notifyParty) {
+    var nEl = el('ci-notify');
+    if (nEl) { nEl.value = data.notifyParty.toUpperCase(); nEl.dataset.m = '1'; }
+    if (data.notifyPartyAddr) {
+      var naEl = el('ci-notifyAddr');
+      if (naEl) { naEl.value = data.notifyPartyAddr.toUpperCase(); naEl.dataset.m = '1'; }
+    }
+  }
+
+  // 4. Port of Loading
+  if (data.pol) setSelectVal('ci-pol', data.pol);
+
+  // 5. Port of Discharge → Final Destination
+  if (data.pod) setSelectVal('ci-dest', data.pod);
+
+  // 6. Vessel & Voy
+  if (data.vessel) s('ci-vessel', data.vessel.toUpperCase());
+
+  // 7. B/L No → BL 섹션 전용 표시 필드
+  if (data.blNo) {
+    var blnoEl = el('bl-blno');
+    var blnoRow = el('bl-blno-row');
+    if (blnoEl) blnoEl.value = data.blNo.toUpperCase();
+    if (blnoRow) blnoRow.style.display = 'flex';
+  }
+
+  // 8. Description of Goods → CI 첫 번째 commodity
+  if (data.description && ciComms.length > 0) {
+    ciComms[0].comm = data.description.toUpperCase();
+    renderCIComms();
+  }
+
+  // 9. Container No. 목록 → PL 컨테이너 테이블
+  if (data.containers && data.containers.length > 0) {
+    cts.length = 0;
+    data.containers.forEach(function(ctNo) {
+      if (ctNo && ctNo.trim()) addCt({ no: ctNo.trim(), nw: '', gw: '', ms: '', ctqty: '1' });
+    });
+  }
+
+  // 10. Gross Weight → pl-tg
+  if (data.grossWeight) {
+    var tgEl = el('pl-tg');
+    if (tgEl) { tgEl.value = data.grossWeight; tgEl.dataset.m = '1'; }
+  }
+
+  // 11. Measurement → pl-tm
+  if (data.measurement) {
+    var tmEl = el('pl-tm');
+    if (tmEl) { tmEl.value = data.measurement; tmEl.dataset.m = '1'; }
+  }
+
+  ciChanged();
+  sv();
+}
+
+async function blHandleFile(input) {
+  var file = input.files[0];
+  if (!file) return;
+
+  var apiKey = (el('bl-api-key') || {}).value;
+  if (!apiKey || !apiKey.trim()) {
+    alert('Claude API Key를 입력하세요.');
+    input.value = ''; return;
+  }
+  apiKey = apiKey.trim();
+  blSaveKey(apiKey);
+
+  var btn = document.querySelector('.bl-btn');
+  if (btn) btn.disabled = true;
+  blSetStatus('⏳ BL 분석 중...', '#c86000');
+
+  try {
+    var imgData;
+    if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
+      blSetStatus('⏳ PDF 변환 중...', '#c86000');
+      imgData = await blPdfToBase64(file);
+      imgData.mediaType = 'image/png';
+    } else {
+      imgData = await blImageToBase64(file);
+      imgData.mediaType = file.type || 'image/jpeg';
+    }
+
+    blSetStatus('⏳ Claude Vision 분석 중...', '#c86000');
+    var data = await blCallClaude(apiKey, imgData.base64, imgData.mediaType);
+
+    blFillForm(data);
+    blSetStatus('✅ BL 데이터 입력 완료 - 내용을 확인하세요', '#1a7a1a');
+    alert('✅ BL 데이터 입력 완료 - 내용을 확인하세요');
+
+  } catch (e) {
+    blSetStatus('❌ 오류: ' + e.message, '#c00');
+    console.error('BL upload error:', e);
+    alert('BL 처리 오류:\n' + e.message);
+  } finally {
+    if (btn) btn.disabled = false;
+    input.value = '';
+  }
+}
+
+// 페이지 로드 시 저장된 API 키 복원
+blLoadKey();
+// ============================================================
 </script>
 </body>
 </html>
