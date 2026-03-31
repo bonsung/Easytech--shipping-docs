@@ -1114,10 +1114,26 @@ function ld(){
 
 async function doReset(){
   if(!confirm('Reset all data?'))return;
-  localStorage.removeItem(SK);localStorage.removeItem(LK);
+  // 1. Clear storage (localStorage + Supabase, await so data is gone before UI clears)
+  localStorage.removeItem(SK); localStorage.removeItem(LK);
   try{await _sb.from('form_state').delete().eq('id','main');}catch(e){}
   try{await _sb.from('master_lists').delete().eq('id','main');}catch(e){}
-  location.reload();
+  // 2. Clear all visible form fields directly (no reload — avoids INIT re-loading defaults)
+  document.querySelectorAll('input.f,input.fs,textarea.f,textarea.fs').forEach(function(e){
+    e.value=''; delete e.dataset.m; e.classList.remove('edited'); e.style.fontSize='';
+  });
+  document.querySelectorAll('select.f,select.fs').forEach(function(e){
+    e.selectedIndex=0; delete e.dataset.m; e.classList.remove('edited'); e.style.fontSize='';
+  });
+  // 3. Restore none-sections to visible/editable
+  ['inv','lc','contract'].forEach(function(k){noneApply(k,false);});
+  // 4. Reset dynamic arrays and re-render empty
+  ciComms=[{comm:'',qty:'',up:'',packing:'',origin:'',qtyShow:''}];
+  plExtraComms=[]; cts=[];
+  renderCIComms();
+  renderPLExtraComms();
+  renderCts();
+  ciCalc(); plCalc(); fitAllInputs();
 }
 
 // ---- AUTO TEXT SHRINK (canvas 측정 방식, input + select 공통) ----
