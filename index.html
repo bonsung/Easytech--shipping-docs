@@ -1871,9 +1871,10 @@ async function blCallClaude(apiKey, base64, mediaType) {
     '  "pod": "Port of Discharge (예: BUSAN, KOREA)",\n' +
     '  "blNo": "B/L Number 또는 FBL No",\n' +
     '  "description": "실제 화학물질명 또는 화물 품명만 추출 (예: CYCLOHEXANONE, METHANOL). \'SHIPPER\'S LOAD & COUNT\', \'SAID TO CONTAIN\', \'FREIGHT\', \'PREPAID\', HS CODE, 포장 정보 등 화물명이 아닌 모든 문구는 제외하고 순수 화물명만 반환",\n' +
+    '  "packing": "Description 란에서 \'PACKING IN ...\' 형태의 포장방법만 추출. 앞의 \'PACKING\'은 제외하고 \'IN ISOTANK\', \'IN FLEXIBAG\', \'IN DRUM\' 등 \'IN ...\'부터 반환. 예: 이미지에 \'PACKING IN ISOTANK\'가 있으면 → \'IN ISOTANK\'",\n' +
     '  "containers": ["CONTAINER_NO/SEAL_NO", "..."],\n' +
-    '  "grossWeight": "총 Gross Weight 숫자만 (단위 제외, 예: 100110)",\n' +
-    '  "measurement": "총 Measurement CBM 숫자만 (단위 제외, 예: 110)"\n' +
+    '  "grossWeight": "Gross Weight 컬럼의 총 중량 숫자만 반환 (콤마 제거, 소수점 이하 포함, KGS/KG 등 단위 제외. 예: 이미지에 \'109,860.000 KGS\'이면 → \'109860.000\')",\n' +
+    '  "measurement": "Measurement 컬럼의 총 CBM 숫자만 반환 (콤마 제거, 소수점 이하 포함, CBM 단위 제외. 예: 이미지에 \'110.000 CBM\'이면 → \'110.000\')"\n' +
     '}\n\n' +
     '없는 항목은 빈 문자열("")로, containers가 없으면 빈 배열([])로 처리하세요.';
 
@@ -1972,6 +1973,12 @@ function blFillForm(data) {
     renderCIComms();
   }
 
+  // 8-1. Packing → CI 첫 번째 packing
+  if (data.packing && ciComms.length > 0) {
+    ciComms[0].packing = data.packing.toUpperCase();
+    renderCIComms();
+  }
+
   // 9. Container No. 목록 → PL 컨테이너 테이블
   if (data.containers && data.containers.length > 0) {
     cts.length = 0;
@@ -1980,10 +1987,11 @@ function blFillForm(data) {
     });
   }
 
-  // 10. Gross Weight → pl-tg
+  // 10. Gross Weight → pl-tg + CI 첫 번째 qty
   if (data.grossWeight) {
     var tgEl = el('pl-tg');
     if (tgEl) { tgEl.value = data.grossWeight; tgEl.dataset.m = '1'; }
+    if (ciComms.length > 0) { ciComms[0].qty = data.grossWeight; renderCIComms(); }
   }
 
   // 11. Measurement → pl-tm
