@@ -1875,7 +1875,8 @@ async function blCallClaude(apiKey, base64, mediaType) {
     '  "containers": ["CONTAINER_NO/SEAL_NO", "..."],\n' +
     '  "grossWeight": "Gross Weight 컬럼의 총 중량 숫자만 반환 (콤마 제거, 소수점 이하 포함, KGS/KG 등 단위 제외. 예: 이미지에 \'109,860.000 KGS\'이면 → \'109860.000\')",\n' +
     '  "quantityUnit": "Gross Weight 숫자 옆 단위만 추출. KGS, KG, MT, CBM, PCS 등 대문자로 반환. 예: \'109,860.000 KGS\'이면 → \'KGS\', \'100.000 MT\'이면 → \'MT\'",\n' +
-    '  "measurement": "Measurement 컬럼의 총 CBM 숫자만 반환 (콤마 제거, 소수점 이하 포함, CBM 단위 제외. 예: 이미지에 \'110.000 CBM\'이면 → \'110.000\')"\n' +
+    '  "measurement": "Measurement 컬럼의 총 CBM 숫자만 반환 (콤마 제거, 소수점 이하 포함, CBM 단위 제외. 예: 이미지에 \'110.000 CBM\'이면 → \'110.000\')",\n' +
+    '  "sailingDate": "BL 우측 하단 \'LOADED ON BOARD\' 아래 날짜를 \'MMM. D, YYYY\' 형식으로 반환. 예: \'MAR.31.2026\' → \'MAR. 31, 2026\', \'31 MARCH 2026\' → \'MAR. 31, 2026\'"\n' +
     '}\n\n' +
     '없는 항목은 빈 문자열("")로, containers가 없으면 빈 배열([])로 처리하세요.';
 
@@ -2018,6 +2019,9 @@ function blFillForm(data) {
     var tmEl = el('pl-tm');
     if (tmEl) { tmEl.value = data.measurement; tmEl.dataset.m = '1'; }
   }
+
+  // 12. Sailing Date (LOADED ON BOARD) → ci-sailing
+  if (data.sailingDate) { s('ci-sailing', data.sailingDate); }
 
   ciChanged();
   sv();
