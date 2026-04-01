@@ -1876,7 +1876,7 @@ async function blCallClaude(apiKey, base64, mediaType) {
     '  "grossWeight": "Gross Weight 컬럼의 총 중량 숫자만 반환 (콤마 제거, 소수점 이하 포함, KGS/KG 등 단위 제외. 예: 이미지에 \'109,860.000 KGS\'이면 → \'109860.000\')",\n' +
     '  "quantityUnit": "Gross Weight 숫자 옆 단위만 추출. KGS, KG, MT, CBM, PCS 등 대문자로 반환. 예: \'109,860.000 KGS\'이면 → \'KGS\', \'100.000 MT\'이면 → \'MT\'",\n' +
     '  "measurement": "Measurement 컬럼의 총 CBM 숫자만 반환 (콤마 제거, 소수점 이하 포함, CBM 단위 제외. 예: 이미지에 \'110.000 CBM\'이면 → \'110.000\')",\n' +
-    '  "sailingDate": "BL 우측 하단 \'LOADED ON BOARD\' 아래 날짜를 \'MMM. D, YYYY\' 형식으로 반환. 예: \'MAR.31.2026\' → \'MAR. 31, 2026\', \'31 MARCH 2026\' → \'MAR. 31, 2026\'"\n' +
+    '  "sailingDate": "이미지에서 \'LOADED ON BOARD\' 또는 \'ON BOARD\' 텍스트를 찾고, 그 바로 아래(또는 옆)에 있는 날짜만 추출. 반드시 \'MMM. D, YYYY\' 형식으로 변환해서 반환. 월은 JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC 중 하나. 예: \'MAR.31.2026\' → \'MAR. 31, 2026\' / \'31 MARCH 2026\' → \'MAR. 31, 2026\' / \'2026-03-31\' → \'MAR. 31, 2026\'. LOADED ON BOARD 날짜가 없으면 빈 문자열 반환"\n' +
     '}\n\n' +
     '없는 항목은 빈 문자열("")로, containers가 없으면 빈 배열([])로 처리하세요.';
 
@@ -2020,8 +2020,14 @@ function blFillForm(data) {
     if (tmEl) { tmEl.value = data.measurement; tmEl.dataset.m = '1'; }
   }
 
-  // 12. Sailing Date (LOADED ON BOARD) → ci-sailing
-  if (data.sailingDate) { s('ci-sailing', data.sailingDate); }
+  // 12. Sailing Date (LOADED ON BOARD) → ci-sailing (기존 값 강제 덮어쓰기)
+  if (data.sailingDate) {
+    var _sdEl = el('ci-sailing');
+    if (_sdEl) { _sdEl.value = data.sailingDate; }
+    s('ci-sailing', data.sailingDate);
+    var _plSd = el('pl-sailing');
+    if (_plSd) { _plSd.value = data.sailingDate; _plSd.dataset.m = ''; }
+  }
 
   ciChanged();
   sv();
