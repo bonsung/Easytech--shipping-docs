@@ -1573,7 +1573,7 @@ function renderCIComms() {
         '</div>' +
       '</td>' +
       '<td style="text-align:center;vertical-align:middle;' + bdTop + '">' +
-        '<input class="f" type="number" value="' + (c.qty||'') + '" placeholder="100" style="text-align:center;width:65px;" oninput="ciCommInput(' + i + ',\'qty\',this.value)">' +
+        '<input class="f" type="text" data-qtyidx="' + i + '" value="' + (c.qty||'') + '" placeholder="100" style="text-align:center;width:65px;" oninput="ciCommInput(' + i + ',\'qty\',this.value)">' +
       '</td>' +
       '<td style="text-align:center;vertical-align:middle;' + bdTop + '">' +
         '<input class="f" type="number" value="' + (c.up||'') + '" placeholder="705" style="text-align:center;width:65px;" oninput="ciCommInput(' + i + ',\'up\',this.value)">' +
@@ -1987,11 +1987,20 @@ function blFillForm(data) {
     });
   }
 
-  // 10. Gross Weight → pl-tg + CI 첫 번째 qty
+  // 10. Gross Weight → pl-tg + CI 첫 번째 qty (포맷: "109,860 KGS")
   if (data.grossWeight) {
     var tgEl = el('pl-tg');
     if (tgEl) { tgEl.value = data.grossWeight; tgEl.dataset.m = '1'; }
-    if (ciComms.length > 0) { ciComms[0].qty = data.grossWeight; renderCIComms(); }
+    if (ciComms.length > 0) {
+      var _gwNum = Math.round(parseFloat(String(data.grossWeight).replace(/,/g,'')) || 0);
+      var _gwFmt = _gwNum.toLocaleString('en-US') + ' KGS';
+      ciComms[0].qty = String(_gwNum);
+      ciComms[0].qtyShow = _gwFmt;
+      ciComms[0].up = '';
+      renderCIComms();
+      var _qInp = document.querySelector('input[data-qtyidx="0"]');
+      if (_qInp) { _qInp.value = _gwFmt; fitText(_qInp); }
+    }
   }
 
   // 11. Measurement → pl-tm
