@@ -1534,12 +1534,12 @@ function ciCalcMulti() {
     totalAmt += amt;
     var amtEl = el('ci-amt-' + i);
     if (amtEl) amtEl.textContent = (qty && up) ? f2(amt) : '';
-    ciComms[i].qtyShow = qty > 0 ? (qty + uDisp) : '';
+    ciComms[i].qtyShow = qty > 0 ? (qty.toLocaleString('en-US') + (uDisp ? ' ' + uDisp : '')) : '';
   }
   var qsEl = el('ci-qtyShow');
   if (qsEl) qsEl.value = ciComms.length > 0 ? (ciComms[0].qtyShow || '') : '';
   var tq = el('ci-tq'), tu = el('ci-tu'), ta = el('ci-ta');
-  if (tq) tq.textContent = totalQty > 0 ? (totalQty + uDisp) : '';
+  if (tq) tq.textContent = totalQty > 0 ? (totalQty.toLocaleString('en-US') + (uDisp ? ' ' + uDisp : '')) : '';
   if (tu) tu.textContent = ciComms.length === 1 ? (upCur + f2(parseFloat(ciComms[0].up)||0) + (upUnitPart ? '/' + upUnitPart : '')) : '';
   if (ta) ta.textContent = totalAmt > 0 ? ((cur ? cur+' ' : '') + f2(totalAmt)) : '';
 }
@@ -1576,7 +1576,7 @@ function renderCIComms() {
         '<input class="f" type="text" data-qtyidx="' + i + '" value="' + (c.qty||'') + '" placeholder="100" style="text-align:center;width:65px;" oninput="ciCommInput(' + i + ',\'qty\',this.value)">' +
       '</td>' +
       '<td style="text-align:center;vertical-align:middle;' + bdTop + '">' +
-        '<input class="f" type="number" value="' + (c.up||'') + '" placeholder="705" style="text-align:center;width:65px;" oninput="ciCommInput(' + i + ',\'up\',this.value)">' +
+        '<input class="f" type="number" value="' + (c.up||'') + '" placeholder="" style="text-align:center;width:65px;" oninput="ciCommInput(' + i + ',\'up\',this.value)">' +
       '</td>' +
       '<td style="text-align:center;vertical-align:middle;' + bdTop + '">' +
         '<span class="cv" id="ci-amt-' + i + '"></span>' +
@@ -1995,9 +1995,12 @@ function blFillForm(data) {
       var _gwNum = Math.round(parseFloat(String(data.grossWeight).replace(/,/g,'')) || 0);
       var _gwFmt = _gwNum.toLocaleString('en-US') + ' KGS';
       ciComms[0].qty = String(_gwNum);
-      ciComms[0].qtyShow = _gwFmt;
       ciComms[0].up = '';
       renderCIComms();
+      // renderCIComms → ciCalcMulti가 qtyShow를 덮어쓰므로 이후에 재설정
+      ciComms[0].qtyShow = _gwFmt;
+      var _qsEl = el('ci-qtyShow');
+      if (_qsEl) { _qsEl.value = _gwFmt; }
       var _qInp = document.querySelector('input[data-qtyidx="0"]');
       if (_qInp) { _qInp.value = _gwFmt; fitText(_qInp); }
     }
