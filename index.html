@@ -2136,6 +2136,27 @@ function doPDF() {
       sp.style.transformOrigin='left center';
     }
   });
+  // PL COMMODITY 품명 자동줄임
+  var plSp=document.querySelector('#pl-comm + .ci-comm-print');
+  if(plSp){
+    plSp.style.display='inline';
+    plSp.style.whiteSpace='nowrap';
+    plSp.style.fontSize='9pt';
+    plSp.style.transformOrigin='left center';
+    plSp.style.transform='';
+    var plTd=plSp.closest('td');
+    if(plTd){
+      var canvas2=document.createElement('canvas');
+      var ctx2=canvas2.getContext('2d');
+      ctx2.font='9pt Arial';
+      var lblW=ctx2.measureText('COMMODITY: ').width;
+      var txtW=ctx2.measureText(plSp.textContent).width;
+      var availW=plTd.offsetWidth-lblW-10;
+      if(txtW>availW){
+        plSp.style.transform='scaleX('+(availW/txtW)+')';
+      }
+    }
+  }
   window.print();
 }
 </script>
