@@ -132,7 +132,9 @@ textarea.fs.edited{border-color:#c86000!important;}
   table.t td[style*="overflow:visible"] span{white-space:normal!important;word-break:break-all!important;overflow:visible!important;}
   /* CI commodity: input 숨기고 print-span 표시 */
   input.ci-comm-inp{display:none!important;}
-  .ci-comm-print{display:block!important;white-space:normal!important;word-break:break-all!important;font-size:9px;vertical-align:top;}
+  .r2{display:flex!important;align-items:flex-start!important;}
+  .r2 b{white-space:nowrap!important;flex-shrink:0!important;}
+  .ci-comm-print{flex:1!important;display:block!important;word-break:break-all!important;white-space:normal!important;font-size:9px;vertical-align:top;}
   input::placeholder,textarea::placeholder{color:transparent!important;}
   [data-phide]{display:none!important;}
   *{-webkit-print-color-adjust:exact;}
