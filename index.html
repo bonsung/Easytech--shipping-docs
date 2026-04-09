@@ -32,7 +32,7 @@ table.t th{background:#f0f0f0;font-weight:700;text-align:center;vertical-align:m
 .r2{display:flex;gap:4px;align-items:center;}
 .r2 .abtn{opacity:0;transition:opacity 0.2s;}
 .r2:hover .abtn{opacity:1;}
-.ci-comm-inp{width:100%;flex-basis:100%;min-width:0;}
+.ci-comm-inp{width:100%;font-size:11px;}
 .ci-comm-print{display:none;}
 
 /* Orange: user-editable inputs */
@@ -136,12 +136,9 @@ textarea.fs.edited{border-color:#c86000!important;}
   table.t td[style*="overflow:visible"] span{white-space:normal!important;word-break:break-all!important;overflow:visible!important;}
   /* 컨테이너 행: CONTAINER NO. 비어있으면 인쇄 시 숨김 */
   .ct-row:has(input[data-k="no"]:placeholder-shown){display:none!important;}
-  /* COMMODITY 행 .r2(레이블+input) 숨기고 span만 표시 */
-  .r2{display:none!important;}
   /* CI/PL COMMODITY 인쇄: input 숨기고 span 표시 */
   .ci-comm-inp{display:none!important;}
   #pl-comm{display:none!important;}
-  .ci-comm-label{display:block!important;white-space:nowrap!important;}
   .ci-comm-print{display:block!important;white-space:nowrap!important;overflow:hidden!important;}
   input::placeholder,textarea::placeholder{color:transparent!important;}
   [data-phide]{display:none!important;}
@@ -1592,14 +1589,13 @@ function renderCIComms() {
     var bdTop = i === 0 ? 'border-bottom:none;' : 'border-top:none;border-bottom:none;';
     var tr = document.createElement('tr');
     tr.innerHTML = nmHtml +
-      '<td style="vertical-align:middle;padding:3px 5px;overflow:visible;height:auto;' + bdTop + '">' +
-        '<div class="r2">' +
-          (i === 0 ? '<b style="white-space:nowrap">COMMODITY:</b>' : '<b style="white-space:normal;color:#1a7a1a">&#8627;</b>') +
-          '<button class="abtn" onclick="openM(\'commodity\')" style="font-size:9px;padding:1px 4px;">관리</button>' + delBtn +
-          '<input class="f ci-comm-inp" type="text" data-idx="' + i + '" value="' + (c.comm||'').replace(/"/g,'&quot;') + '" placeholder="Commodity" style="width:100%;flex-basis:100%;font-size:11px;">' +
+      '<td style="vertical-align:middle;padding:3px 5px;overflow:visible;' + bdTop + '">' +
+        '<div style="display:flex;align-items:center;gap:4px;">' +
+          (i === 0 ? '<b style="white-space:nowrap">COMMODITY:</b>' : '<b style="white-space:nowrap;color:#1a7a1a">&#8627;</b>') +
+          '<button class="abtn" onclick="openM(\'commodity\')" style="font-size:9px;padding:1px 4px;opacity:0;transition:opacity 0.2s;">관리</button>' + delBtn +
         '</div>' +
-        (i===0?'<b class="ci-comm-label" style="display:none;white-space:nowrap">COMMODITY: </b>':'<b class="ci-comm-label" style="display:none;white-space:nowrap">&#8627; </b>') +
-        '<span class="ci-comm-print" style="display:none">' + (c.comm||'').replace(/</g,'&lt;') + '</span>' +
+        '<input class="f ci-comm-inp" type="text" data-idx="' + i + '" value="' + (c.comm||'').replace(/"/g,'&quot;') + '" placeholder="Commodity">' +
+        '<span class="ci-comm-print" style="display:none"></span>' +
       '</td>' +
       '<td style="text-align:center;vertical-align:middle;' + bdTop + '">' +
         '<input class="f" type="text" data-qtyidx="' + i + '" value="' + (c.qty||'') + '" placeholder="100" style="text-align:center;width:65px;" oninput="ciCommInput(' + i + ',\'qty\',this.value)">' +
