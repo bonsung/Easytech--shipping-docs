@@ -136,6 +136,8 @@ textarea.fs.edited{border-color:#c86000!important;}
   table.t td[style*="overflow:visible"] span{white-space:normal!important;word-break:break-all!important;overflow:visible!important;}
   /* 컨테이너 행: CONTAINER NO. 비어있으면 인쇄 시 숨김 */
   .ct-row:has(input[data-k="no"]:placeholder-shown){display:none!important;}
+  /* COMMODITY 행 .r2(레이블+input) 숨기고 span만 표시 */
+  .r2{display:none!important;}
   /* CI/PL COMMODITY 인쇄: input 숨기고 span 표시 */
   .ci-comm-inp{display:none!important;}
   #pl-comm{display:none!important;}
@@ -1595,7 +1597,7 @@ function renderCIComms() {
           '<button class="abtn" onclick="openM(\'commodity\')" style="font-size:9px;padding:1px 4px;">관리</button>' + delBtn +
           '<input class="f ci-comm-inp" type="text" data-idx="' + i + '" value="' + (c.comm||'').replace(/"/g,'&quot;') + '" placeholder="Commodity" style="width:100%;flex-basis:100%;font-size:11px;">' +
         '</div>' +
-        '<span class="ci-comm-print" style="display:none">' + (c.comm||'').replace(/</g,'&lt;') + '</span>' +
+        '<span class="ci-comm-print" style="display:none">' + (i===0?'COMMODITY: ':'&#8627; ') + (c.comm||'').replace(/</g,'&lt;') + '</span>' +
       '</td>' +
       '<td style="text-align:center;vertical-align:middle;' + bdTop + '">' +
         '<input class="f" type="text" data-qtyidx="' + i + '" value="' + (c.qty||'') + '" placeholder="100" style="text-align:center;width:65px;" oninput="ciCommInput(' + i + ',\'qty\',this.value)">' +
@@ -1613,13 +1615,13 @@ function renderCIComms() {
     var idx=parseInt(inp.dataset.idx);
     inp.addEventListener('input',function(){
       ciCommInput(idx,'comm',this.value);
-      var sp=this.nextElementSibling;
-      if(sp&&sp.classList.contains('ci-comm-print'))sp.textContent=this.value;
+      var td=this.closest('td');var sp=td&&td.querySelector('.ci-comm-print');
+      if(sp)sp.textContent=(idx===0?'COMMODITY: ':'↳ ')+this.value;
     });
     inp.addEventListener('change',function(){
       ciCommInput(idx,'comm',this.value);
-      var sp=this.nextElementSibling;
-      if(sp&&sp.classList.contains('ci-comm-print'))sp.textContent=this.value;
+      var td=this.closest('td');var sp=td&&td.querySelector('.ci-comm-print');
+      if(sp)sp.textContent=(idx===0?'COMMODITY: ':'↳ ')+this.value;
     });
     var dl=initCDrop(inp,function(){return getL().commodity||[];});
     if(dl)_ciCommDrops.push(dl);
@@ -2118,8 +2120,8 @@ async function blHandleFile(input) {
 function doPDF() {
   // 모든 .ci-comm-print span에 대응 input 값 동기화
   document.querySelectorAll('.ci-comm-inp').forEach(function(inp){
-    var sp=inp.nextElementSibling;
-    if(sp&&sp.classList.contains('ci-comm-print'))sp.textContent=inp.value;
+    var td=inp.closest('td');var sp=td&&td.querySelector('.ci-comm-print');
+    if(sp)sp.textContent=(inp.dataset.idx==='0'?'COMMODITY: ':'↳ ')+inp.value;
   });
   var plC=el('pl-comm');
   if(plC){var plSp=plC.nextElementSibling;if(plSp&&plSp.classList.contains('ci-comm-print'))plSp.textContent=plC.value;}
