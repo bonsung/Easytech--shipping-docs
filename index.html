@@ -2123,41 +2123,21 @@ function doPDF() {
   });
   var plC=el('pl-comm');
   if(plC){var plSp=plC.nextElementSibling;if(plSp&&plSp.classList.contains('ci-comm-print'))plSp.textContent=plC.value;}
-  // ci-comm-print 자동줄임
+  // ci-comm-print span을 잠깐 화면에 표시해서 너비 측정 후 print
   document.querySelectorAll('.ci-comm-print').forEach(function(sp){
-    sp.style.cssText='display:block;white-space:nowrap;font-size:9pt;visibility:visible;position:static;';
-    var td=sp.closest('td');
-    if(!td)return;
-    var tdW=td.offsetWidth;
-    var spW=sp.scrollWidth;
-    if(spW>tdW){
-      var ratio=tdW/spW;
-      sp.style.transform='scaleX('+ratio+')';
-      sp.style.transformOrigin='left center';
-    }
+    sp.style.cssText='display:block;white-space:nowrap;font-size:9pt;position:fixed;visibility:hidden;top:-9999px;';
   });
-  // PL COMMODITY 품명 자동줄임
-  var plSp=document.querySelector('#pl-comm + .ci-comm-print');
-  if(plSp){
-    plSp.style.display='inline';
-    plSp.style.whiteSpace='nowrap';
-    plSp.style.fontSize='9pt';
-    plSp.style.transformOrigin='left center';
-    plSp.style.transform='';
-    var plTd=plSp.closest('td');
-    if(plTd){
-      var canvas2=document.createElement('canvas');
-      var ctx2=canvas2.getContext('2d');
-      ctx2.font='9pt Arial';
-      var lblW=ctx2.measureText('COMMODITY: ').width;
-      var txtW=ctx2.measureText(plSp.textContent).width;
-      var availW=plTd.offsetWidth-lblW-10;
-      if(txtW>availW){
-        plSp.style.transform='scaleX('+(availW/txtW)+')';
-      }
-    }
-  }
-  window.print();
+  setTimeout(function(){
+    document.querySelectorAll('.ci-comm-print').forEach(function(sp){
+      var td=sp.closest('td');
+      if(!td)return;
+      var tdW=td.offsetWidth;
+      var spW=sp.offsetWidth;
+      sp.style.cssText='display:block;white-space:nowrap;font-size:9pt;transform-origin:left center;transform:'+
+        (spW>tdW?'scaleX('+(tdW/spW)+')':'')+';';
+    });
+    window.print();
+  },100);
 }
 </script>
 </body>
