@@ -139,7 +139,7 @@ textarea.fs.edited{border-color:#c86000!important;}
   /* CI/PL COMMODITY 인쇄: input 숨기고 span 표시 */
   .ci-comm-inp{display:none!important;}
   #pl-comm{display:none!important;}
-  .ci-comm-print{display:block!important;white-space:nowrap!important;overflow:hidden!important;}
+  .ci-comm-print{display:block!important;white-space:nowrap!important;overflow:hidden!important;font-size:8pt!important;max-width:100%!important;transform:scaleX(1)!important;transform-origin:left center!important;}
   input::placeholder,textarea::placeholder{color:transparent!important;}
   [data-phide]{display:none!important;}
   *{-webkit-print-color-adjust:exact;}
@@ -2116,27 +2116,13 @@ async function blHandleFile(input) {
 // ============================================================
 
 function doPDF() {
-  // 모든 .ci-comm-print span에 대응 input 값 동기화
+  // .ci-comm-print span에 input 값 동기화
   document.querySelectorAll('.ci-comm-inp').forEach(function(inp){
     var td=inp.closest('td');var sp=td&&td.querySelector('.ci-comm-print');
     if(sp)sp.textContent=inp.value;
   });
   var plC=el('pl-comm');
   if(plC){var plSp=plC.nextElementSibling;if(plSp&&plSp.classList.contains('ci-comm-print'))plSp.textContent=plC.value;}
-  // 셀 너비 초과 시 font-size 자동 축소 (getBoundingClientRect 기준)
-  document.querySelectorAll('.ci-comm-print').forEach(function(sp){
-    sp.style.display='block';
-    sp.style.whiteSpace='nowrap';
-    sp.style.fontSize='9pt';
-    sp.style.overflow='hidden';
-    var td=sp.closest('td');
-    if(!td)return;
-    var maxW=td.getBoundingClientRect().width;
-    for(var s=9;s>=5;s-=0.5){
-      sp.style.fontSize=s+'pt';
-      if(sp.getBoundingClientRect().width<=maxW)break;
-    }
-  });
   window.print();
 }
 </script>
