@@ -2123,15 +2123,18 @@ function doPDF() {
   });
   var plC=el('pl-comm');
   if(plC){var plSp=plC.nextElementSibling;if(plSp&&plSp.classList.contains('ci-comm-print'))plSp.textContent=plC.value;}
-  // 셀 너비 초과 시 font-size 자동 축소
-  document.querySelectorAll('.ci-comm-print').forEach(function(el){
-    el.style.display='block';
-    el.style.whiteSpace='nowrap';
-    el.style.fontSize='10pt';
-    var td=el.closest('td');
+  // 셀 너비 초과 시 font-size 자동 축소 (getBoundingClientRect 기준)
+  document.querySelectorAll('.ci-comm-print').forEach(function(sp){
+    sp.style.display='block';
+    sp.style.whiteSpace='nowrap';
+    sp.style.fontSize='9pt';
+    sp.style.overflow='hidden';
+    var td=sp.closest('td');
     if(!td)return;
-    while(el.scrollWidth>td.offsetWidth&&parseFloat(el.style.fontSize)>5){
-      el.style.fontSize=(parseFloat(el.style.fontSize)-0.5)+'pt';
+    var maxW=td.getBoundingClientRect().width;
+    for(var s=9;s>=5;s-=0.5){
+      sp.style.fontSize=s+'pt';
+      if(sp.getBoundingClientRect().width<=maxW)break;
     }
   });
   window.print();
