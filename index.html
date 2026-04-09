@@ -2116,28 +2116,17 @@ async function blHandleFile(input) {
 // ============================================================
 
 function doPDF() {
-  // .ci-comm-print span에 input 값 동기화
   document.querySelectorAll('.ci-comm-inp').forEach(function(inp){
-    var td=inp.closest('td');var sp=td&&td.querySelector('.ci-comm-print');
-    if(sp)sp.textContent=inp.value;
+    var sp=inp.nextElementSibling;
+    while(sp&&!sp.classList.contains('ci-comm-print'))sp=sp.nextElementSibling;
+    if(!sp)return;
+    sp.textContent=inp.value;
+    var currentSize=window.getComputedStyle(inp).fontSize;
+    sp.style.cssText='display:block;white-space:nowrap;font-size:'+currentSize+';transform-origin:left center;';
   });
   var plC=el('pl-comm');
   if(plC){var plSp=plC.nextElementSibling;if(plSp&&plSp.classList.contains('ci-comm-print'))plSp.textContent=plC.value;}
-  // ci-comm-print span을 잠깐 화면에 표시해서 너비 측정 후 print
-  document.querySelectorAll('.ci-comm-print').forEach(function(sp){
-    sp.style.cssText='display:block;white-space:nowrap;font-size:9pt;position:fixed;visibility:hidden;top:-9999px;';
-  });
-  setTimeout(function(){
-    document.querySelectorAll('.ci-comm-print').forEach(function(sp){
-      var td=sp.closest('td');
-      if(!td)return;
-      var tdW=td.offsetWidth;
-      var spW=sp.offsetWidth;
-      sp.style.cssText='display:block;white-space:nowrap;font-size:9pt;transform-origin:left center;transform:'+
-        (spW>tdW?'scaleX('+(tdW/spW)+')':'')+';';
-    });
-    window.print();
-  },100);
+  window.print();
 }
 </script>
 </body>
