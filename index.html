@@ -140,6 +140,8 @@ textarea.fs.edited{border-color:#c86000!important;}
   .ci-comm-inp{display:none!important;}
   #pl-comm{display:none!important;}
   .ci-comm-print{display:inline!important;white-space:nowrap!important;overflow:hidden!important;max-width:70%!important;}
+  .no-print{display:none!important;}
+  .ci-comm-td{width:100%!important;}
   input::placeholder,textarea::placeholder{color:transparent!important;}
   [data-phide]{display:none!important;}
   *{-webkit-print-color-adjust:exact;}
@@ -1589,7 +1591,7 @@ function renderCIComms() {
     var bdTop = i === 0 ? 'border-bottom:none;' : 'border-top:none;border-bottom:none;';
     var tr = document.createElement('tr');
     tr.innerHTML = nmHtml +
-      '<td style="vertical-align:middle;padding:3px 5px;overflow:visible;' + bdTop + '">' +
+      '<td class="ci-comm-td" style="vertical-align:middle;padding:3px 5px;overflow:visible;' + bdTop + '">' +
         '<div style="display:flex;align-items:center;gap:4px;">' +
           (i === 0 ? '<b style="white-space:nowrap">COMMODITY:</b>' : '<b style="white-space:nowrap;color:#1a7a1a">&#8627;</b>') +
           '<button class="abtn" onclick="openM(\'commodity\')" style="font-size:9px;padding:1px 4px;opacity:0;transition:opacity 0.2s;">관리</button>' + delBtn +
@@ -1597,13 +1599,13 @@ function renderCIComms() {
         '<input class="f ci-comm-inp" type="text" data-idx="' + i + '" value="' + (c.comm||'').replace(/"/g,'&quot;') + '" placeholder="Commodity">' +
         '<span class="ci-comm-print" style="display:none"></span>' +
       '</td>' +
-      '<td style="text-align:center;vertical-align:middle;' + bdTop + '">' +
+      '<td class="no-print" style="text-align:center;vertical-align:middle;' + bdTop + '">' +
         '<input class="f" type="text" data-qtyidx="' + i + '" value="' + (c.qty||'') + '" placeholder="100" style="text-align:center;width:65px;" oninput="ciCommInput(' + i + ',\'qty\',this.value)">' +
       '</td>' +
-      '<td style="text-align:center;vertical-align:middle;' + bdTop + '">' +
+      '<td class="no-print" style="text-align:center;vertical-align:middle;' + bdTop + '">' +
         '<input class="f" type="number" value="' + (c.up||'') + '" placeholder="" style="text-align:center;width:65px;" oninput="ciCommInput(' + i + ',\'up\',this.value)">' +
       '</td>' +
-      '<td style="text-align:center;vertical-align:middle;' + bdTop + '">' +
+      '<td class="no-print" style="text-align:center;vertical-align:middle;' + bdTop + '">' +
         '<span class="cv" id="ci-amt-' + i + '"></span>' +
       '</td>';
     tb.appendChild(tr);
