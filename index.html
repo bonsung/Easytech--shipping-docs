@@ -139,7 +139,7 @@ textarea.fs.edited{border-color:#c86000!important;}
   /* CI/PL COMMODITY 인쇄: input 숨기고 span 표시 */
   .ci-comm-inp{display:none!important;}
   #pl-comm{display:none!important;}
-  .ci-comm-print{display:block!important;white-space:nowrap!important;overflow:hidden!important;font-size:8pt!important;max-width:100%!important;transform:scaleX(1)!important;transform-origin:left center!important;}
+  .ci-comm-print{display:block!important;white-space:nowrap!important;overflow:hidden!important;font-size:8pt!important;max-width:100%!important;}
   input::placeholder,textarea::placeholder{color:transparent!important;}
   [data-phide]{display:none!important;}
   *{-webkit-print-color-adjust:exact;}
@@ -2123,6 +2123,16 @@ function doPDF() {
   });
   var plC=el('pl-comm');
   if(plC){var plSp=plC.nextElementSibling;if(plSp&&plSp.classList.contains('ci-comm-print'))plSp.textContent=plC.value;}
+  document.querySelectorAll('.ci-comm-print').forEach(function(sp){
+    sp.style.display='block';
+    sp.style.whiteSpace='nowrap';
+    sp.style.fontSize='8pt';
+    sp.style.transformOrigin='left center';
+    var td=sp.closest('td');
+    if(!td)return;
+    var ratio=td.offsetWidth/sp.offsetWidth;
+    sp.style.transform=ratio<1?'scaleX('+ratio+')':'';
+  });
   window.print();
 }
 </script>
