@@ -2121,8 +2121,8 @@ function doPDF() {
     while(sp&&!sp.classList.contains('ci-comm-print'))sp=sp.nextElementSibling;
     if(!sp)return;
     sp.textContent=inp.value;
-    var currentSize=window.getComputedStyle(inp).fontSize;
-    sp.style.cssText='display:block;white-space:nowrap;font-size:'+currentSize+';transform-origin:left center;';
+    var fs=inp.style.fontSize||'9pt';
+    sp.style.cssText='display:block;white-space:nowrap;font-size:'+fs+';transform-origin:left center;';
   });
   var plC=el('pl-comm');
   if(plC){var plSp=plC.nextElementSibling;if(plSp&&plSp.classList.contains('ci-comm-print'))plSp.textContent=plC.value;}
