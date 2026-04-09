@@ -44,6 +44,17 @@ textarea.f{border:1px solid #c86000;resize:none;text-transform:none;}
 input.f:focus,select.f:focus,textarea.f:focus{background:#fff8f0;}
 select.f{text-transform:none;}
 input.f[type=number]{text-align:center;}
+div.ci-comm-inp{
+  width:100%;min-width:0;flex:1;
+  border:none;border-bottom:1px solid #c86000;
+  font-family:inherit;font-size:11px;font-weight:700;
+  color:#c86000;background:transparent;outline:none;
+  text-transform:uppercase;padding:1px 2px;
+  white-space:pre-wrap;word-break:break-word;
+  cursor:text;line-height:1.4;
+}
+div.ci-comm-inp:focus{background:#fff8f0;}
+div.ci-comm-inp:empty:before{content:attr(data-placeholder);color:#bbb;font-weight:400;text-transform:none;pointer-events:none;}
 
 /* Green: auto-synced from CI to PL */
 input.fs,textarea.fs{
@@ -132,11 +143,10 @@ textarea.fs.edited{border-color:#c86000!important;}
   /* COMMODITY 셀 텍스트 잘림 방지 */
   table.t td[style*="overflow:visible"]{overflow:visible!important;height:auto!important;}
   table.t td[style*="overflow:visible"] span{white-space:normal!important;word-break:break-all!important;overflow:visible!important;}
-  /* CI commodity: input 숨기고 print-span 표시 */
-  input.ci-comm-inp{display:none!important;}
+  /* CI commodity: contenteditable div - 인쇄 시 텍스트 줄바꿈 허용 */
   .r2{display:flex!important;align-items:flex-start!important;}
   .r2>b{flex-shrink:0!important;white-space:nowrap!important;}
-  .ci-comm-print{display:block!important;word-break:break-all!important;white-space:normal!important;}
+  div.ci-comm-inp{white-space:pre-wrap!important;word-break:break-all!important;color:#000!important;border:none!important;background:transparent!important;}
   input::placeholder,textarea::placeholder{color:transparent!important;}
   [data-phide]{display:none!important;}
   *{-webkit-print-color-adjust:exact;}
@@ -814,6 +824,16 @@ function popSel(id,arr,isObj){
 }
 
 // ---- CUSTOM DROPDOWN (req 11) ----
+function _cdropGetVal(el){return el.isContentEditable?el.textContent:el.value;}
+function _cdropSetVal(el,v){
+  if(el.isContentEditable){
+    el.textContent=v;
+    el.dispatchEvent(new Event('input',{bubbles:true}));
+  } else {
+    el.value=v;
+    el.dispatchEvent(new Event('change',{bubbles:true}));
+  }
+}
 function initCDrop(inputEl, getOpts){
   if(!inputEl)return;
   var list=document.createElement('ul');
@@ -828,7 +848,7 @@ function initCDrop(inputEl, getOpts){
   }
   function show(filterByInput){
     var items=getOpts();
-    var q=(filterByInput&&inputEl.value.trim().toUpperCase())||'';
+    var q=(filterByInput&&_cdropGetVal(inputEl).trim().toUpperCase())||'';
     var filtered=q?items.filter(function(x){return x.toUpperCase().indexOf(q)>=0;}):items;
     if(!filtered.length){list.style.display='none';return;}
     list.innerHTML=filtered.map(function(x){
@@ -847,9 +867,8 @@ function initCDrop(inputEl, getOpts){
     while(li&&li!==list&&!(li.className&&li.className.indexOf('cdrop-item')>=0))li=li.parentNode;
     if(!li||!li.getAttribute||!li.getAttribute('data-val'))return;
     e.preventDefault();
-    inputEl.value=li.getAttribute('data-val');
+    _cdropSetVal(inputEl, li.getAttribute('data-val'));
     list.style.display='none';
-    inputEl.dispatchEvent(new Event('change',{bubbles:true}));
   });
   inputEl.addEventListener('blur',function(){setTimeout(function(){list.style.display='none';},150);});
   window.addEventListener('resize',function(){if(list.style.display!=='none')updatePos();});
@@ -1576,11 +1595,10 @@ function renderCIComms() {
     var tr = document.createElement('tr');
     tr.innerHTML = nmHtml +
       '<td style="vertical-align:middle;padding:3px 5px;overflow:visible;height:auto;' + bdTop + '">' +
-        '<div class="r2" style="flex-wrap:wrap;">' +
+        '<div class="r2">' +
           (i === 0 ? '<b style="white-space:nowrap">COMMODITY:</b>' : '<b style="white-space:normal;color:#1a7a1a">&#8627;</b>') +
           '<button class="abtn" onclick="openM(\'commodity\')" style="font-size:9px;padding:1px 4px;">관리</button>' + delBtn +
-          '<input class="f ci-comm-inp" type="text" data-idx="' + i + '" value="' + (c.comm||'').replace(/"/g,'&quot;') + '" placeholder="Commodity" style="min-width:0;font-size:11px;">' +
-          '<span class="ci-comm-print" style="display:none;white-space:normal;word-break:break-all;font-size:9px;">' + (c.comm||'').replace(/</g,'&lt;') + '</span>' +
+          '<div class="f ci-comm-inp" contenteditable="true" data-idx="' + i + '" data-placeholder="Commodity">' + (c.comm||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>' +
         '</div>' +
       '</td>' +
       '<td style="text-align:center;vertical-align:middle;' + bdTop + '">' +
@@ -1597,14 +1615,11 @@ function renderCIComms() {
   // CI commodity autocomplete
   tb.querySelectorAll('.ci-comm-inp').forEach(function(inp){
     var idx=parseInt(inp.dataset.idx);
-    inp.addEventListener('input',function(){ciCommInput(idx,'comm',this.value);var sp=this.nextElementSibling;if(sp&&sp.classList.contains('ci-comm-print'))sp.textContent=this.value;});
-    inp.addEventListener('change',function(){ciCommInput(idx,'comm',this.value);var sp=this.nextElementSibling;if(sp&&sp.classList.contains('ci-comm-print'))sp.textContent=this.value;});
+    inp.addEventListener('input',function(){ciCommInput(idx,'comm',this.textContent);});
+    inp.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();}});
     var dl=initCDrop(inp,function(){return getL().commodity||[];});
     if(dl)_ciCommDrops.push(dl);
   });
-  setTimeout(function(){
-    document.querySelectorAll('.ci-comm-inp').forEach(function(el){fitText(el);});
-  },0);
   // ci-nm 값 복원 및 높이 자동 조정
   var newNM = el('ci-nm');
   if (newNM) {
