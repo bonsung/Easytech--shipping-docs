@@ -146,7 +146,7 @@ textarea.fs.edited{border-color:#c86000!important;}
   input.ci-comm-inp{display:none!important;}
   .r2{display:block!important;}
   .r2>b{display:block!important;}
-  .ci-comm-print{display:block!important;white-space:nowrap!important;font-size:8pt!important;}
+  .ci-comm-print{display:block!important;white-space:nowrap!important;overflow:hidden!important;font-size:8pt!important;transform-origin:left center!important;}
   input::placeholder,textarea::placeholder{color:transparent!important;}
   [data-phide]{display:none!important;}
   *{-webkit-print-color-adjust:exact;}
@@ -2112,18 +2112,20 @@ async function blHandleFile(input) {
 // blLoadKey()는 위 INIT IIFE 안에서 호출됨
 // ============================================================
 
-// PDF 출력 직전: span 값 동기화 + 셀 너비 초과 시 font-size 자동 축소
+// PDF 출력 직전: span 값 동기화 + scaleX로 셀 너비에 맞게 자동 축소
 window.addEventListener('beforeprint', function() {
   document.querySelectorAll('.ci-comm-inp').forEach(function(inp) {
     var sp = inp.nextElementSibling;
     if (sp && sp.classList.contains('ci-comm-print')) sp.textContent = inp.value;
   });
   document.querySelectorAll('.ci-comm-print').forEach(function(el) {
+    el.style.transform = '';
     el.style.fontSize = '8pt';
     var td = el.closest('td');
     if (td) {
-      while (el.scrollWidth > td.clientWidth && parseFloat(el.style.fontSize) > 5) {
-        el.style.fontSize = (parseFloat(el.style.fontSize) - 0.5) + 'pt';
+      var ratio = td.clientWidth / el.scrollWidth;
+      if (ratio < 1) {
+        el.style.transform = 'scaleX(' + ratio + ')';
       }
     }
   });
