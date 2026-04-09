@@ -471,7 +471,7 @@ textarea.fs.edited{border-color:#c86000!important;}
     </tr>
     <tr>
       <td rowspan="99" style="text-align:center;vertical-align:top;padding:4px 2px;font-weight:700;color:#111;border-top:none;border-bottom:none;"><textarea class="f" id="pl-nm" style="text-align:center;font-weight:700;color:#111;-webkit-text-fill-color:#111;width:100%;height:auto;min-height:60px;border:none;resize:none;overflow:hidden;display:block;" oninput="autoResize(this);sv();">N/M</textarea></td>
-      <td colspan="2" style="vertical-align:top;padding:5px 6px;border-right:none;overflow:visible;height:auto;">
+      <td colspan="6" style="vertical-align:top;padding:5px 6px;overflow:visible;height:auto;">
         <div style="margin-bottom:2px;display:flex;align-items:center;gap:4px;">
           <span style="font-weight:700;white-space:nowrap;">COMMODITY:</span>
           <input class="fs" id="pl-comm" type="text" style="flex:1;min-width:0;font-size:11px;font-family:inherit;border:none;border-bottom:1px solid #1a7a1a;background:transparent;outline:none;" oninput="plManual(this);var sp=this.nextElementSibling;if(sp&&sp.classList.contains('ci-comm-print'))sp.textContent=this.value;">
@@ -484,8 +484,8 @@ textarea.fs.edited{border-color:#c86000!important;}
         <div><span style="font-weight:700;">PACKING: </span>
           <input class="fs" id="pl-packing" style="display:inline-block;width:auto;min-width:110px;vertical-align:bottom;" oninput="plManual(this)">
         </div>
+        <div id="pl-extra-comms" style="position:relative;z-index:1;"></div>
       </td>
-      <td style="border:none;vertical-align:top;padding:3px 4px;"><div id="pl-extra-comms" style="position:relative;z-index:1;"></div></td><td style="border:none;"></td><td style="border-left:none;border-top:none;border-bottom:none;border-right:1px solid #888;"></td>
     </tr>
     <tbody id="pl-extra-comm-rows"></tbody>
     <tr id="ctHead" style="display:none;">
