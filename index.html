@@ -146,7 +146,7 @@ textarea.fs.edited{border-color:#c86000!important;}
   input.ci-comm-inp{display:none!important;}
   .r2{display:block!important;}
   .r2>b{display:block!important;}
-  .ci-comm-print{display:block!important;white-space:normal!important;word-break:break-all!important;font-size:7pt!important;}
+  .ci-comm-print{display:block!important;white-space:nowrap!important;font-size:8pt!important;}
   input::placeholder,textarea::placeholder{color:transparent!important;}
   [data-phide]{display:none!important;}
   *{-webkit-print-color-adjust:exact;}
@@ -1598,7 +1598,7 @@ function renderCIComms() {
         '<div class="r2">' +
           (i === 0 ? '<b style="white-space:nowrap">COMMODITY:</b>' : '<b style="white-space:normal;color:#1a7a1a">&#8627;</b>') +
           '<button class="abtn" onclick="openM(\'commodity\')" style="font-size:9px;padding:1px 4px;">관리</button>' + delBtn +
-          '<input class="f ci-comm-inp" type="text" data-idx="' + i + '" value="' + (c.comm||'').replace(/"/g,'&quot;') + '" placeholder="Commodity" oninput="fitText(this)" style="min-width:0;font-size:11px;">' +
+          '<input class="f ci-comm-inp" type="text" data-idx="' + i + '" value="' + (c.comm||'').replace(/"/g,'&quot;') + '" placeholder="Commodity" oninput="fitText(this)" style="width:100%;flex-basis:100%;min-width:0;font-size:11px;">' +
           '<span class="ci-comm-print" style="display:none;white-space:normal;word-break:break-all;font-size:7pt;">' + (c.comm||'').replace(/</g,'&lt;') + '</span>' +
         '</div>' +
       '</td>' +
@@ -2112,11 +2112,20 @@ async function blHandleFile(input) {
 // blLoadKey()는 위 INIT IIFE 안에서 호출됨
 // ============================================================
 
-// PDF 출력 직전: ci-comm-print span에 input 값 최종 동기화
+// PDF 출력 직전: span 값 동기화 + 셀 너비 초과 시 font-size 자동 축소
 window.addEventListener('beforeprint', function() {
   document.querySelectorAll('.ci-comm-inp').forEach(function(inp) {
     var sp = inp.nextElementSibling;
     if (sp && sp.classList.contains('ci-comm-print')) sp.textContent = inp.value;
+  });
+  document.querySelectorAll('.ci-comm-print').forEach(function(el) {
+    el.style.fontSize = '8pt';
+    var td = el.closest('td');
+    if (td) {
+      while (el.scrollWidth > td.clientWidth && parseFloat(el.style.fontSize) > 5) {
+        el.style.fontSize = (parseFloat(el.style.fontSize) - 0.5) + 'pt';
+      }
+    }
   });
 });
 </script>
