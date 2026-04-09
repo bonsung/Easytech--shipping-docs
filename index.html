@@ -29,7 +29,7 @@ table.t{width:100%;border-collapse:collapse;table-layout:fixed;}
 table.t td,table.t th{border:1px solid #888;padding:4px 6px;vertical-align:top;font-size:11px;overflow:hidden;word-break:break-word;}
 table.t th{background:#f0f0f0;font-weight:700;text-align:center;vertical-align:middle;}
 .lbl{font-weight:700;color:#222;display:block;margin-bottom:3px;font-size:10px;}
-.r2{display:flex;flex-wrap:wrap;gap:4px;align-items:center;}
+.r2{display:flex;gap:4px;align-items:center;}
 .r2 .abtn{opacity:0;transition:opacity 0.2s;}
 .r2:hover .abtn{opacity:1;}
 .ci-comm-inp{width:100%;flex-basis:100%;min-width:0;}
@@ -1590,7 +1590,7 @@ function renderCIComms() {
         '<div class="r2">' +
           (i === 0 ? '<b style="white-space:nowrap">COMMODITY:</b>' : '<b style="white-space:normal;color:#1a7a1a">&#8627;</b>') +
           '<button class="abtn" onclick="openM(\'commodity\')" style="font-size:9px;padding:1px 4px;">관리</button>' + delBtn +
-          '<input class="f ci-comm-inp" type="text" data-idx="' + i + '" value="' + (c.comm||'').replace(/"/g,'&quot;') + '" placeholder="Commodity" style="font-size:11px;">' +
+          '<input class="f ci-comm-inp" type="text" data-idx="' + i + '" value="' + (c.comm||'').replace(/"/g,'&quot;') + '" placeholder="Commodity" style="width:100%;flex-basis:100%;font-size:11px;">' +
           '<span class="ci-comm-print" style="display:none">' + (c.comm||'').replace(/</g,'&lt;') + '</span>' +
         '</div>' +
       '</td>' +
