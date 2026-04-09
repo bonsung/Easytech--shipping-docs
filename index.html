@@ -2122,7 +2122,8 @@ function doPDF() {
     if(!sp)return;
     sp.textContent=inp.value;
     var fs=inp.style.fontSize||'9pt';
-    sp.style.cssText='display:block;white-space:nowrap;font-size:'+fs+';transform-origin:left center;';
+    var fsPt=fs.indexOf('px')>-1?(parseFloat(fs)/1.333).toFixed(1)+'pt':fs;
+    sp.style.cssText='display:block;white-space:nowrap;font-size:'+fsPt+';transform-origin:left center;';
   });
   var plC=el('pl-comm');
   if(plC){var plSp=plC.nextElementSibling;if(plSp&&plSp.classList.contains('ci-comm-print'))plSp.textContent=plC.value;}
