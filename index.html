@@ -2129,16 +2129,13 @@ function doPDF() {
 
 window.addEventListener('beforeprint', function() {
   document.querySelectorAll('.ci-comm-print').forEach(function(el) {
-    el.style.fontSize = '';
     el.style.whiteSpace = 'nowrap';
+    el.style.fontSize = '8pt';
+    el.offsetWidth;
     var td = el.closest('td');
     if (!td) return;
-    var size = 11; // 기본 크기에서 시작
-    el.style.fontSize = size + 'pt';
-    el.offsetWidth;
-    while (el.scrollWidth > td.offsetWidth && size > 4) {
-      size -= 0.5;
-      el.style.fontSize = size + 'pt';
+    while (el.scrollWidth > td.offsetWidth && parseFloat(el.style.fontSize) > 4) {
+      el.style.fontSize = (parseFloat(el.style.fontSize) - 0.5) + 'pt';
       el.offsetWidth;
     }
   });
