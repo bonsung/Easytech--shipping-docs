@@ -1597,6 +1597,7 @@ function renderCIComms() {
     inp.addEventListener('change',function(){ciCommInput(idx,'comm',this.value);var sp=this.nextElementSibling;if(sp&&sp.classList.contains('ci-comm-print'))sp.textContent=this.value;});
     var dl=initCDrop(inp,function(){return getL().commodity||[];});
     if(dl)_ciCommDrops.push(dl);
+    fitText(inp);
   });
   // ci-nm 값 복원 및 높이 자동 조정
   var newNM = el('ci-nm');
