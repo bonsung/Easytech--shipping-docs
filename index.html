@@ -29,7 +29,7 @@ table.t{width:100%;border-collapse:collapse;table-layout:fixed;}
 table.t td,table.t th{border:1px solid #888;padding:4px 6px;vertical-align:top;font-size:11px;overflow:hidden;word-break:break-word;}
 table.t th{background:#f0f0f0;font-weight:700;text-align:center;vertical-align:middle;}
 .lbl{font-weight:700;color:#222;display:block;margin-bottom:3px;font-size:10px;}
-.r2{display:flex;gap:4px;align-items:center;}
+.r2{display:flex;flex-wrap:wrap;gap:4px;align-items:center;}
 .r2 .abtn{opacity:0;transition:opacity 0.2s;}
 .r2:hover .abtn{opacity:1;}
 
@@ -45,7 +45,7 @@ input.f:focus,select.f:focus,textarea.f:focus{background:#fff8f0;}
 select.f{text-transform:none;}
 input.f[type=number]{text-align:center;}
 div.ci-comm-inp{
-  width:100%;min-width:0;flex:1;
+  width:100%;flex-basis:100%;min-width:0;
   border:none;border-bottom:1px solid #c86000;
   font-family:inherit;font-size:11px;font-weight:700;
   color:#c86000;background:transparent;outline:none;
@@ -143,10 +143,10 @@ textarea.fs.edited{border-color:#c86000!important;}
   /* COMMODITY 셀 텍스트 잘림 방지 */
   table.t td[style*="overflow:visible"]{overflow:visible!important;height:auto!important;}
   table.t td[style*="overflow:visible"] span{white-space:normal!important;word-break:break-all!important;overflow:visible!important;}
-  /* CI commodity: contenteditable div - 인쇄 시 텍스트 줄바꿈 허용 */
-  .r2{display:flex!important;align-items:flex-start!important;}
-  .r2>b{flex-shrink:0!important;white-space:nowrap!important;}
-  div.ci-comm-inp{white-space:pre-wrap!important;word-break:break-all!important;color:#000!important;border:none!important;background:transparent!important;}
+  /* CI commodity: 인쇄 시 block 레이아웃으로 2줄 고정 */
+  .r2{display:block!important;}
+  .r2>b{display:block!important;white-space:nowrap!important;}
+  div.ci-comm-inp{display:block!important;word-break:break-word!important;white-space:normal!important;color:#000!important;border:none!important;background:transparent!important;}
   input::placeholder,textarea::placeholder{color:transparent!important;}
   [data-phide]{display:none!important;}
   *{-webkit-print-color-adjust:exact;}
