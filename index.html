@@ -2125,6 +2125,8 @@ function doPDF() {
   if(plC){var plSp=plC.nextElementSibling;if(plSp&&plSp.classList.contains('ci-comm-print'))plSp.textContent=plC.value;}
   // 셀 너비 초과 시 font-size 자동 축소
   document.querySelectorAll('.ci-comm-print').forEach(function(el){
+    el.style.display='block';
+    el.style.whiteSpace='nowrap';
     el.style.fontSize='10pt';
     var td=el.closest('td');
     if(!td)return;
