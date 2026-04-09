@@ -171,7 +171,7 @@ textarea.fs.edited{border-color:#c86000!important;}
     <select class="ws" id="writer"></select>
     <button class="abtn" style="background:#4a8;" onclick="openM('writer')">관리</button>
     <button class="btn bxl" onclick="doExcel()">Excel</button>
-    <button class="btn bpdf" onclick="window.print()">PDF</button>
+    <button class="btn bpdf" onclick="doPDF()">PDF</button>
     <button class="btn brs" onclick="doReset()">Reset</button>
   </div>
 </div>
@@ -2111,6 +2111,21 @@ async function blHandleFile(input) {
 
 // blLoadKey()는 위 INIT IIFE 안에서 호출됨
 // ============================================================
+
+function doPDF() {
+  document.querySelectorAll('.ci-comm-print').forEach(function(el) {
+    el.style.fontSize = '8pt';
+    el.style.whiteSpace = 'nowrap';
+    var td = el.closest('td');
+    if (td) {
+      var maxW = td.offsetWidth;
+      while (el.scrollWidth > maxW && parseFloat(el.style.fontSize) > 5) {
+        el.style.fontSize = (parseFloat(el.style.fontSize) - 0.5) + 'pt';
+      }
+    }
+  });
+  window.print();
+}
 
 // PDF 출력 직전: span 값 동기화 + scaleX로 셀 너비에 맞게 자동 축소
 window.addEventListener('beforeprint', function() {
