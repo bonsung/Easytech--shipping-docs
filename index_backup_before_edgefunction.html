@@ -1836,6 +1836,7 @@ el('modal').addEventListener('click',function(e){if(e.target===this)closeM();});
     var p=el('pl-nm');if(p)autoResize(p);
   })();
   setTimeout(function(){ciCalc();plCalc();syncPL();syncNotify();fitAllInputs();},100);
+  await blLoadKey();
 })();
 // 창 닫기/새로고침 시 강제 저장
 window.addEventListener('beforeunload',function(){sv();});
@@ -1843,6 +1844,16 @@ window.addEventListener('beforeunload',function(){sv();});
 // ============================================================
 //  BL UPLOAD → CI/PL 자동입력
 // ============================================================
+
+var _blApiKey = null;
+
+async function blLoadKey() {
+  try {
+    var r = await _sb.from('settings').select('value').eq('key', 'anthropic_api_key').single();
+    if (r.data && r.data.value) { _blApiKey = r.data.value; }
+    else { console.warn('BL: anthropic_api_key not found in settings'); }
+  } catch (e) { console.warn('BL: failed to load api key', e); }
+}
 
 function blSetStatus(msg, color) {
   var st = document.getElementById('bl-status');
@@ -1881,7 +1892,7 @@ async function blPdfToBase64(file) {
   return { base64: canvas.toDataURL('image/png').split(',')[1] };
 }
 
-async function blCallClaude(base64, mediaType) {
+async function blCallClaude(apiKey, base64, mediaType) {
   var prompt = '이 이미지는 선하증권(Bill of Lading / FBL)입니다.\n' +
     '아래 항목을 정확히 추출하여 순수 JSON만 반환하세요 (마크다운/설명 없이).\n\n' +
     '{\n' +
@@ -1905,19 +1916,34 @@ async function blCallClaude(base64, mediaType) {
     '}\n\n' +
     '없는 항목은 빈 문자열("")로, containers가 없으면 빈 배열([])로 처리하세요.';
 
-  var fnResp = await _sb.functions.invoke('call-claude-vision', {
-    body: { image: base64, mediaType: mediaType, prompt: prompt }
+  var resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'content-type': 'application/json',
+      'anthropic-dangerous-direct-browser-calls': 'true',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 1024,
+      messages: [{
+        role: 'user',
+        content: [
+          { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
+          { type: 'text', text: prompt }
+        ]
+      }]
+    })
   });
-  var fnData = fnResp.data, fnError = fnResp.error;
 
-  if (fnError) {
-    throw new Error('Edge Function 호출 실패: ' + fnError.message);
+  if (!resp.ok) {
+    var errTxt = await resp.text();
+    throw new Error('API ' + resp.status + ': ' + errTxt.slice(0, 200));
   }
-  if (fnData && fnData.error) {
-    throw new Error(fnData.error);
-  }
-
-  var text = ((fnData && fnData.text) || '').trim();
+  var result = await resp.json();
+  var text = result.content[0].text.trim();
   var m = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
   if (m) text = m[1];
   return JSON.parse(text);
@@ -2047,6 +2073,13 @@ async function blHandleFile(input) {
   var file = input.files[0];
   if (!file) return;
 
+  if (!_blApiKey) { await blLoadKey(); }
+  var apiKey = _blApiKey;
+  if (!apiKey || !apiKey.trim()) {
+    alert('API key를 불러올 수 없습니다.');
+    input.value = ''; return;
+  }
+
   var btn = document.querySelector('.bl-btn');
   if (btn) btn.disabled = true;
   blSetStatus('⏳ BL 분석 중...', '#c86000');
@@ -2063,7 +2096,7 @@ async function blHandleFile(input) {
     }
 
     blSetStatus('⏳ Claude Vision 분석 중...', '#c86000');
-    var data = await blCallClaude(imgData.base64, imgData.mediaType);
+    var data = await blCallClaude(apiKey, imgData.base64, imgData.mediaType);
 
     blFillForm(data);
     blSetStatus('✅ BL 데이터 입력 완료 - 내용을 확인하세요', '#1a7a1a');
@@ -2079,6 +2112,7 @@ async function blHandleFile(input) {
   }
 }
 
+// blLoadKey()는 위 INIT IIFE 안에서 호출됨
 // ============================================================
 
 function doPDF() {
