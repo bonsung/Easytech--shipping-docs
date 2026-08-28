@@ -92,3 +92,27 @@ After closing modal, `closeM()` calls `fillAddr('shipper')`, `fillAddr('consigne
 - **`ShippingDocs_v4 (12).html`** is the original pre-Claude-Code baseline. Do not modify it.
 - **`shipping docs supabase/index.html`** is a separate experimental version with Supabase backend — unrelated to the main app.
 - Excel reference layouts are in `CI PL Format Standard.xlsx` and `invoice.xlsx`.
+
+## Aliyun OSS 배포 명령어
+
+**중요: ossutil이 아닌 `aliyun` CLI 사용**
+
+### Shipping Docs 배포
+`shippingdocs.easytech-teamwork.com` 커스텀 도메인은 `easytech-shippingdocs-hk` 버킷(루트 `index.html`)에 바인딩되어 있음.
+`easytech-teamwork-hk/shippingdocs/index.html`은 실제 서비스 도메인과 무관한 잘못된 경로이니 사용 금지 (2026-08-28 확인, 과거 여기로 배포한 이력이 있으나 반영되지 않았음).
+```
+aliyun oss cp "C:\Users\Samsung\Desktop\0 Claude code 작업\000 Shipping Docs 입력기\index.html" oss://easytech-shippingdocs-hk/index.html --meta "Content-Type:text/html" -e oss-cn-hongkong.aliyuncs.com --force
+```
+
+### GitHub 동시 배포
+```
+git add . && git commit -m "[수정내용]" && git push
+```
+
+### Team Daily Report 배포
+```
+aliyun oss cp "C:\Users\Samsung\Desktop\AI 관련 코딩 작업물\Netlify Easytech Final\index.html" oss://easytech-teamwork-hk/index.html --meta "Content-Type:text/html" -e oss-cn-hongkong.aliyuncs.com --force
+```
+
+### CLI 설치 경로
+`C:\aliyun-cli\`
