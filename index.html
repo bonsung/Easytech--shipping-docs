@@ -1905,16 +1905,15 @@ async function blCallClaude(base64, mediaType) {
     '}\n\n' +
     '없는 항목은 빈 문자열("")로, containers가 없으면 빈 배열([])로 처리하세요.';
 
-  var fnResp = await _sb.functions.invoke('call-claude-vision', {
-    body: { image: base64, mediaType: mediaType, prompt: prompt }
+  var fnRes = await fetch('https://call-cle-vision-shippins-vision-ygcrldddqh.cn-hongkong.fcapp.run', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ image: base64, mediaType: mediaType, prompt: prompt })
   });
-  var fnData = fnResp.data, fnError = fnResp.error;
+  var fnData = await fnRes.json().catch(function(){ return {}; });
 
-  if (fnError) {
-    throw new Error('Edge Function 호출 실패: ' + fnError.message);
-  }
-  if (fnData && fnData.error) {
-    throw new Error(fnData.error);
+  if (!fnRes.ok || (fnData && fnData.error)) {
+    throw new Error((fnData && fnData.error) || ('Vision 함수 호출 실패: ' + fnRes.status));
   }
 
   var text = ((fnData && fnData.text) || '').trim();
