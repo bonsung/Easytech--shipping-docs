@@ -116,3 +116,34 @@ aliyun oss cp "C:\Users\Samsung\Desktop\AI 관련 코딩 작업물\Netlify Easyt
 
 ### CLI 설치 경로
 `C:\aliyun-cli\`
+
+## BL 자동입력 (Claude Vision) 구조
+
+**실제 구조 (2026-09-23 기준 — "Supabase Edge Function 경유"는 옛 구조이므로 참고 금지)**
+
+브라우저(shippingdocs.easytech-teamwork.com)
+→ 홍콩 FC: `shippingdocs-vision` / `call-claude-vision` (중계 역할만)
+→ 싱가포르 FC(ap-southeast-1): `shippingdocs-vision` / `call-claude-vision` (여기서 실제 Claude API 호출)
+→ Claude API
+
+- 싱가포르를 거치는 이유: Claude API가 중국 본토·홍콩에서 차단됨. 홍콩 함수는 중국 사무실에서 VPN 없이 접속하기 위한 창구.
+- 홍콩 함수 환경변수 `worker_url` = 싱가포르 함수 주소, relay secret으로 인증.
+- 두 리전의 서비스·함수 이름이 동일하므로 주소창의 리전(`cn-hongkong` / `ap-southeast-1`)으로 반드시 구분.
+
+**API 키 위치 ★중요★**: Anthropic API 키는 **싱가포르 함수(ap-southeast-1)의 환경변수**에 있음. Supabase settings 테이블/Edge Function은 현재 이 기능에 쓰이지 않음.
+
+**API 키 교체 절차**
+1. Claude Console에서 새 키 발급 (이름 예: `BL연동_aliyun_YYYYMMDD`)
+2. https://fcnext.console.aliyun.com/ap-southeast-1/services 접속 (주소창에 `ap-southeast-1` 확인)
+3. `shippingdocs-vision` → `call-claude-vision` → 编辑环境变量
+4. Anthropic 키 항목 교체 → 确定(저장)
+5. shippingdocs 사이트에서 BL 업로드 테스트 → "BL 데이터 입력 완료" 확인
+6. Claude Console에서 옛 키 삭제 (키 화면 캡처·공유 절대 금지)
+
+**에러 발생 시 확인 순서**
+1. F12 → Network 탭 열어둔 상태로 BL 업로드
+2. `call-cle-vision-...` (Type: fetch) → Preview에서 에러 메시지 확인
+3. "Vision API request failed" = 싱가포르 함수(Claude 호출 단계) 실패 → 대부분 API 키 문제
+4. 로그보다 함수 코드(`index.js`)부터 먼저 확인
+
+**남은 과제**: 홍콩→싱가포르→Claude 3단계 경유 + 콜드스타트 + 최소 사양(0.16 vCPU/256MB)로 인한 속도 저하. 개선 후보 — 싱가포르 함수 사양 상향 / 사용 모델 확인 / 이미지 크기 축소.
